@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ship placement{% endblock %}
+
+
+{% block body %}
+    <h1>{{ game.id }}</h1>
+
+    {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
+        {% for j in 0..9 %}
+            <div>
+                {{ i~j }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="#">Reset board</a>
+    <a href="#">Confirm board</a>
+
+{% endblock %}
+

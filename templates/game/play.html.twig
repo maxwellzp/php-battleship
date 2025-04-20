@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+
+    <div>
+        <h1>Your board</h1>
+        {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
+            {% for j in 0..9 %}
+                <div>
+                    {{ i~j }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div>
+        <h1>Enemy board</h1>
+        {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
+            {% for j in 0..9 %}
+                <div>
+                    {{ i~j }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <a href="#">Surrender</a>
+
+    <h3>Game events</h3>
+    <ul>
+        <li>Game started</li>
+        <li>Enemy battleship sunk</li>
+        <li>You attacked: B5 = Miss</li>
+        <li>You attacked: B3 = Hit</li>
+        <li>Enemy attack received: C6 = Miss</li>
+    </ul>
+
+
+{% endblock %}

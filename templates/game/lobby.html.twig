@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lobby of the Game {% endblock %}
+
+{% block body %}
+
+    <div>
+        <h2>Player 1: {{ game.player1.username }}</h2>
+        <h2>Player 2: {{ game.player2 ? game.player2.username : 'Waiting for Player 2...' }}</h2>
+    </div>
+    
+    <div>
+        {% if game.status.value == 'active' %}
+            <a href="{{ path('app_game_ship_placement', { id: game.id }) }}">Place Your Ships</a>
+        {% endif %}
+    </div>
+
+{% endblock %}

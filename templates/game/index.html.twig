@@ -3,7 +3,11 @@
 {% block title %}Battleship game{% endblock %}
 
 {% block body %}
-    {% for game in games %}
-        {{ game.id }}
-    {% endfor %}
+
+    <form action="{{ path('app_game_create') }}" method="post">
+        <input type="submit" value="Create a new game">
+    </form>
+
+    {{ include('game/_list_games.html.twig', { games: games }) }}
+
 {% endblock %}
