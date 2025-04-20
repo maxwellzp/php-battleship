@@ -123,4 +123,9 @@ class Shot
     {
         return $this->result;
     }
+
+    public function setResult(ShotResult $result): void
+    {
+        $this->result = $result;
+    }
 }
