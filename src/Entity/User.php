@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -39,6 +41,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     private ?string $username = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    private ?int $wins = null;
+
+    #[ORM\Column]
+    private ?int $losses = null;
 
     public function getId(): ?Uuid
     {
@@ -123,6 +134,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getWins(): ?int
+    {
+        return $this->wins;
+    }
+
+    public function setWins(int $wins): static
+    {
+        $this->wins = $wins;
+
+        return $this;
+    }
+
+    public function getLosses(): ?int
+    {
+        return $this->losses;
+    }
+
+    public function setLosses(int $losses): static
+    {
+        $this->losses = $losses;
 
         return $this;
     }

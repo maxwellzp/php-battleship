@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\GameStatus;
 use App\Repository\GameRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -30,6 +31,21 @@ class Game
 
     #[ORM\ManyToOne]
     private ?User $player2 = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private array $playersReady = [];
+
+    #[ORM\ManyToOne]
+    private ?User $winner = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $finishedAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->status = GameStatus::WAITING;
+    }
 
     public function getId(): ?Uuid
     {
@@ -80,6 +96,47 @@ class Game
     public function setPlayer2(?User $player2): static
     {
         $this->player2 = $player2;
+
+        return $this;
+    }
+
+    public function getPlayersReady(): array
+    {
+        return $this->playersReady;
+    }
+
+    public function addPlayerReady(?Uuid $uuid): static
+    {
+        $this->playersReady[$uuid] = $uuid;
+        return $this;
+    }
+
+    public function removePlayerReady(?Uuid $uuid): static
+    {
+        unset($this->playersReady[$uuid]);
+        return $this;
+    }
+
+    public function getWinner(): ?User
+    {
+        return $this->winner;
+    }
+
+    public function setWinner(?User $winner): static
+    {
+        $this->winner = $winner;
+
+        return $this;
+    }
+
+    public function getFinishedAt(): ?\DateTimeImmutable
+    {
+        return $this->finishedAt;
+    }
+
+    public function setFinishedAt(?\DateTimeImmutable $finishedAt): static
+    {
+        $this->finishedAt = $finishedAt;
 
         return $this;
     }

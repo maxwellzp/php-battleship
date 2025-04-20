@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Game;
+use App\Entity\User;
 use App\Enum\GameStatus;
 use App\Repository\GameRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 final class GameController extends AbstractController
 {
@@ -44,6 +46,28 @@ final class GameController extends AbstractController
     #[Route('/game/{id}/play', name: 'game_play')]
     public function play(Game $game): Response
     {
+
+        return new Response();
+    }
+
+    public function markPlayerAsReady(
+        #[CurrentUser] User $user,
+        GameRepository $gameRepository,
+        Game $game): Response
+    {
+        $game->addPlayerReady($user->getId());
+        $gameRepository->save($game, true);
+
+        return new Response();
+    }
+
+    public function unMarkPlayerAsReady(
+        #[CurrentUser] User $user,
+        GameRepository $gameRepository,
+        Game $game): Response
+    {
+        $game->removePlayerReady($user->getId());
+        $gameRepository->save($game, true);
 
         return new Response();
     }
