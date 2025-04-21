@@ -1,9 +1,11 @@
-<div>
-    <h3>Game ID: {{ game.id }}</h3>
+<th>{{ game.id }}</th>
+<td>{{ game.player1.username }}</td>
+<td>{{ game.status.value }}</td>
+<td>{{ game.createdAt.format('Y-m-d H:i:s') }}</td>
+<td>
     {% if game.player1 != app.user %}
         <form action="{{ path('app_game_join', { id: game.id }) }}" method="POST">
-            <input type="submit" value="Join Game">
+            <input class="btn btn-outline-primary" type="submit" value="Join Game">
         </form>
     {% endif %}
-    <hr>
-</div>
+</td>

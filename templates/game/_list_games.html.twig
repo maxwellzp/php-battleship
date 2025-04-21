@@ -1,3 +1,5 @@
 {% for game in games %}
-    {{ include('game/_game.html.twig', { game: game }) }}
+    <tr>
+        {{ include('game/_game.html.twig', { game: game }) }}
+    </tr>
 {% endfor %}

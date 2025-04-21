@@ -13,6 +13,41 @@
         {% endblock %}
     </head>
     <body>
+
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark">
+        <div class="container">
+            <a href="" class="navbar-brand">Battleship</a>
+            <button
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    class="navbar-toggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{{ path('app_game_index') }}" class="nav-link active">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        {% if app.user is not null %}
+                        <a href="{{ path('app_logout') }}" class="nav-link">Logout</a>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="nav-link">Login</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
         {% block body %}{% endblock %}
+    </main>
+
     </body>
 </html>

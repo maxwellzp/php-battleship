@@ -19,14 +19,14 @@
         <h1>Enemy board</h1>
         {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
             {% for j in 0..9 %}
-                <div>
+                <div >
                     {{ i~j }}
                 </div>
             {% endfor %}
         {% endfor %}
     </div>
 
-    <a href="#">Surrender</a>
+    <a class="btn btn-warning" href="#">Surrender</a>
 
     <h3>Game events</h3>
     <ul>

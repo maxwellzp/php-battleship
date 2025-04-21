@@ -4,10 +4,32 @@
 
 {% block body %}
 
-    <form action="{{ path('app_game_create') }}" method="post">
-        <input type="submit" value="Create a new game">
-    </form>
+    <div class="row p-3">
+        <div class="col m-4 mx-auto">
+            <form action="{{ path('app_game_create') }}" method="post">
+                <input class="btn btn-outline-primary" type="submit" value="Create a new game">
+            </form>
+        </div>
+    </div>
 
-    {{ include('game/_list_games.html.twig', { games: games }) }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Game ID</th>
+                    <th>Created by</th>
+                    <th>Status</th>
+                    <th>Created at</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{ include('game/_list_games.html.twig', { games: games }) }}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 
 {% endblock %}

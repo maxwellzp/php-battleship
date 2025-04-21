@@ -4,15 +4,39 @@
 
 {% block body %}
 
-    <div>
-        <h2>Player 1: {{ game.player1.username }}</h2>
-        <h2>Player 2: {{ game.player2 ? game.player2.username : 'Waiting for Player 2...' }}</h2>
+    <div class="row py-5">
+
+    <div class="col">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Player #</th>
+                <th>Username</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Player 1</td>
+                <td>{{ game.player1.username }}</td>
+                <td>Waiting for Player 2...</td>
+            </tr>
+            <tr>
+                <td>Player 2</td>
+                <td>{{ game.player2 ? game.player2.username }}</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-    
-    <div>
-        {% if game.status.value == 'active' %}
-            <a href="{{ path('app_game_ship_placement', { id: game.id }) }}">Place Your Ships</a>
-        {% endif %}
+
+    <div class="row">
+        <div class="col-12">
+            {% if game.status.value == 'active' %}
+                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">Place
+                    Your Ships</a>
+            {% endif %}
+        </div>
     </div>
 
 {% endblock %}

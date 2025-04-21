@@ -4,18 +4,35 @@
 
 
 {% block body %}
-    <h1>{{ game.id }}</h1>
+    <div class="row my-3">
+        <p>Place your ships to the board and press the 'Confirm board' button.</p>
+    </div>
 
-    {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
-        {% for j in 0..9 %}
-            <div>
-                {{ i~j }}
+    <div class="row">
+        <div class="col-6">
+            <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
+                {% for row in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
+                    {% for col in 0..9 %}
+                        <div
+                                class="border text-center"
+                                style="height: 40px; line-height: 40px;"
+                        >
+                            {{ row~col }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
             </div>
-        {% endfor %}
-    {% endfor %}
 
-    <a href="#">Reset board</a>
-    <a href="#">Confirm board</a>
+            <div class="mt-4">
+                <a class="btn btn-outline-primary" href="#">Reset board</a>
+                <a class="btn btn-outline-primary" href="#">Auto placement</a>
+                <a class="btn btn-outline-primary" href="#">Confirm board</a>
+            </div>
+
+        </div>
+
+    </div>
+
 
 {% endblock %}
 
