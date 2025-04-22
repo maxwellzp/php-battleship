@@ -10,29 +10,63 @@
 
     <div class="row">
         <div class="col-6">
-            <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
-                {% for row in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
-                    {% for col in 0..9 %}
-                        <div
-                                class="border text-center"
-                                style="height: 40px; line-height: 40px;"
-                        >
-                            {{ row~col }}
-                        </div>
+            <div {{ stimulus_controller('placement') }}>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input
+                                {{ stimulus_action('placement', 'setOrientation', 'change') }}
+                                {{ stimulus_target('placement', 'orientationHorizontal') }}
+                                class="form-check-input"
+                                type="radio"
+                                name="orientation"
+                                id="orientationHorizontal"
+                                value="horizontal" checked>
+                        <label class="form-check-label" for="orientationHorizontal">
+                            ↔ Horizontal
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input
+                                {{ stimulus_action('placement', 'setOrientation', 'change') }}
+                                {{ stimulus_target('placement', 'orientationVertical') }}
+                                class="form-check-input"
+                                type="radio"
+                                name="orientation"
+                                id="orientationVertical"
+                                value="vertical">
+                        <label class="form-check-label" for="orientationVertical">
+                            ↕ Vertical
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
+                    {% for row in 0..9 %}
+                        {% for col in 0..9 %}
+                            <div
+                                    {{ stimulus_action('placement', 'placeShip', 'click') }}
+                                    data-board-x-value="{{ col }}"
+                                    data-board-y-value="{{ row }}"
+                                    class="border text-center"
+                                    style="height: 40px; line-height: 40px;"
+                            >
+                                &nbsp;
+                            </div>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
+                </div>
+                <div class="mt-4">
+                    <button
+                            {{ stimulus_action('placement', 'resetBoard') }}
+                            class="btn btn-outline-primary"
+                            href="#">Reset board</button>
+                    <a class="btn btn-outline-primary" href="#">Auto placement</a>
+                    <a class="btn btn-outline-primary" href="#">Confirm board</a>
+                </div>
             </div>
-
-            <div class="mt-4">
-                <a class="btn btn-outline-primary" href="#">Reset board</a>
-                <a class="btn btn-outline-primary" href="#">Auto placement</a>
-                <a class="btn btn-outline-primary" href="#">Confirm board</a>
-            </div>
-
         </div>
-
     </div>
-
 
 {% endblock %}
 
