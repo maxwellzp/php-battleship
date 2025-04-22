@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250420140533 extends AbstractMigration
+final class Version20250422134940 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,10 +21,16 @@ final class Version20250420140533 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            CREATE TABLE board (id UUID NOT NULL, width INT NOT NULL, height INT NOT NULL, PRIMARY KEY(id))
+            CREATE TABLE board (id UUID NOT NULL, game_id UUID NOT NULL, width INT NOT NULL, height INT NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_58562B47E48FD905 ON board (game_id)
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN board.id IS '(DC2Type:uuid)'
+        SQL);
+        $this->addSql(<<<'SQL'
+            COMMENT ON COLUMN board.game_id IS '(DC2Type:uuid)'
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE game (id UUID NOT NULL, player1_id UUID DEFAULT NULL, player2_id UUID DEFAULT NULL, winner_id UUID DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, status VARCHAR(255) NOT NULL, players_ready JSON DEFAULT NULL, finished_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))
@@ -140,6 +146,9 @@ final class Version20250420140533 extends AbstractMigration
             CREATE TRIGGER notify_trigger AFTER INSERT OR UPDATE ON messenger_messages FOR EACH ROW EXECUTE PROCEDURE notify_messenger_messages();
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE board ADD CONSTRAINT FK_58562B47E48FD905 FOREIGN KEY (game_id) REFERENCES game (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE game ADD CONSTRAINT FK_232B318CC0990423 FOREIGN KEY (player1_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
@@ -164,6 +173,9 @@ final class Version20250420140533 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE SCHEMA public
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE board DROP CONSTRAINT FK_58562B47E48FD905
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE game DROP CONSTRAINT FK_232B318CC0990423

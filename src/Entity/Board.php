@@ -32,6 +32,10 @@ class Board
     #[ORM\OneToMany(targetEntity: Shot::class, mappedBy: 'board', orphanRemoval: true)]
     private Collection $shots;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Game $game = null;
+
     public function __construct()
     {
         $this->shots = new ArrayCollection();
@@ -92,6 +96,18 @@ class Board
                 $shot->setBoard(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGame(): ?Game
+    {
+        return $this->game;
+    }
+
+    public function setGame(?Game $game): static
+    {
+        $this->game = $game;
 
         return $this;
     }

@@ -4,11 +4,21 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Board;
 use App\Entity\Game;
+use App\Entity\Ship;
 use App\Entity\User;
 use App\Enum\GameStatus;
+use App\Enum\ShipOrientation;
+use App\Enum\ShipType;
+use App\Factory\BoardFactory;
+use App\Factory\ShipFactory;
 use App\Repository\GameRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -83,10 +93,149 @@ final class GameController extends AbstractController
     public function shipPlacementSave(
         #[CurrentUser] User $user,
         Game $game,
-    ): Response
+        LoggerInterface $logger,
+        Request $request,
+        ShipFactory $shipFactory,
+        BoardFactory $boardFactory,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
     {
-        #TODO save board coordinates
-        return $this->redirectToRoute('app_game_ship_placement');
+        $data = json_decode($request->getContent(), true);
+
+        $board = $boardFactory->create($game);
+        $entityManager->persist($board);
+        $entityManager->flush();
+
+        /*
+         [
+   {
+      "name":"Carrier",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":3,
+            "y":0
+         },
+         {
+            "x":4,
+            "y":0
+         },
+         {
+            "x":5,
+            "y":0
+         },
+         {
+            "x":6,
+            "y":0
+         },
+         {
+            "x":7,
+            "y":0
+         }
+      ]
+   },
+   {
+      "name":"Battleship",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":5,
+            "y":5
+         },
+         {
+            "x":6,
+            "y":5
+         },
+         {
+            "x":7,
+            "y":5
+         },
+         {
+            "x":8,
+            "y":5
+         }
+      ]
+   },
+   {
+      "name":"Cruiser",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":0,
+            "y":3
+         },
+         {
+            "x":1,
+            "y":3
+         },
+         {
+            "x":2,
+            "y":3
+         }
+      ]
+   },
+   {
+      "name":"Submarine",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":1,
+            "y":7
+         },
+         {
+            "x":2,
+            "y":7
+         },
+         {
+            "x":3,
+            "y":7
+         }
+      ]
+   },
+   {
+      "name":"Destroyer",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":6,
+            "y":8
+         },
+         {
+            "x":7,
+            "y":8
+         }
+      ]
+   },
+   {
+      "name":"Destroyer",
+      "orientation":"horizontal",
+      "coords":[
+         {
+            "x":7,
+            "y":2
+         },
+         {
+            "x":8,
+            "y":2
+         }
+      ]
+   }
+]
+         */
+
+
+        foreach ($data as $placement) {
+            $ship = $shipFactory->create(
+                $board,
+                ShipType::from($placement['name']),
+                ShipOrientation::from($placement['orientation']),
+                $placement['coords']);
+            $entityManager->persist($ship);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'ok']);
     }
 
     #[Route('/game/{id}/play', name: 'game_play')]
