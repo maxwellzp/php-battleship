@@ -8,8 +8,23 @@ export default class extends Controller {
 
     connect() {
         console.log('Connect!');
+        this.ships = [
+            { name: "Carrier", size: 5 },
+            { name: "Battleship", size: 4 },
+            { name: "Cruiser", size: 3 },
+            { name: "Submarine", size: 3 },
+            { name: "Destroyer", size: 2 },
+        ];
+
         this.updateRadioButtons();
         console.log('Initial orientation:', this.orientationValue);
+
+        this.boardCells = this.element.querySelectorAll("[data-board-x-value]");
+        this.boardCells.forEach((cell) => {
+            console.log(cell);
+        });
+
+
     }
 
     setOrientation(event) {
@@ -20,6 +35,9 @@ export default class extends Controller {
 
     resetBoard() {
         console.log("Call resetBoard");
+        this.boardCells.forEach((cell) => {
+            cell.innerHTML = "";
+        })
     }
 
     updateRadioButtons() {
@@ -35,6 +53,14 @@ export default class extends Controller {
         const x = parseInt(event.currentTarget.dataset.boardXValue);
         const y = parseInt(event.currentTarget.dataset.boardYValue);
         console.log(x, y);
+    }
+
+    saveShips(){
+        console.log("Call saveShips");
+    }
+
+    autoPlacement() {
+        console.log("Call autoPlacement");
     }
 
 }

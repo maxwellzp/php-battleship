@@ -60,9 +60,16 @@
                     <button
                             {{ stimulus_action('placement', 'resetBoard') }}
                             class="btn btn-outline-primary"
-                            href="#">Reset board</button>
-                    <a class="btn btn-outline-primary" href="#">Auto placement</a>
-                    <a class="btn btn-outline-primary" href="#">Confirm board</a>
+                            >Reset board</button>
+                    <button
+                            {{ stimulus_action('placement', 'autoPlacement') }}
+                            class="btn btn-outline-primary"
+                            >Auto placement</button>
+                    <button
+                            {{ stimulus_action('placement', 'saveShips') }}
+                            class="btn btn-outline-primary"
+                            >Confirm board
+                    </button>
                 </div>
             </div>
         </div>
