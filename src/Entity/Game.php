@@ -41,6 +41,10 @@ class Game
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $finishedAt = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $currentTurn = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -137,6 +141,18 @@ class Game
     public function setFinishedAt(?\DateTimeImmutable $finishedAt): static
     {
         $this->finishedAt = $finishedAt;
+
+        return $this;
+    }
+
+    public function getCurrentTurn(): ?User
+    {
+        return $this->currentTurn;
+    }
+
+    public function setCurrentTurn(?User $currentTurn): static
+    {
+        $this->currentTurn = $currentTurn;
 
         return $this;
     }

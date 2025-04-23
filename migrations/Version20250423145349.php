@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250423082033 extends AbstractMigration
+final class Version20250423145349 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -39,7 +39,7 @@ final class Version20250423082033 extends AbstractMigration
             COMMENT ON COLUMN board.player_id IS '(DC2Type:uuid)'
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE game (id UUID NOT NULL, player1_id UUID DEFAULT NULL, player2_id UUID DEFAULT NULL, winner_id UUID DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, status VARCHAR(255) NOT NULL, players_ready JSON DEFAULT NULL, finished_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))
+            CREATE TABLE game (id UUID NOT NULL, player1_id UUID DEFAULT NULL, player2_id UUID DEFAULT NULL, winner_id UUID DEFAULT NULL, current_turn_id UUID NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, status VARCHAR(255) NOT NULL, players_ready JSON DEFAULT NULL, finished_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_232B318CC0990423 ON game (player1_id)
@@ -49,6 +49,9 @@ final class Version20250423082033 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_232B318C5DFCD4B8 ON game (winner_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_232B318CB5421D0C ON game (current_turn_id)
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN game.id IS '(DC2Type:uuid)'
@@ -61,6 +64,9 @@ final class Version20250423082033 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN game.winner_id IS '(DC2Type:uuid)'
+        SQL);
+        $this->addSql(<<<'SQL'
+            COMMENT ON COLUMN game.current_turn_id IS '(DC2Type:uuid)'
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN game.created_at IS '(DC2Type:datetime_immutable)'
@@ -167,6 +173,9 @@ final class Version20250423082033 extends AbstractMigration
             ALTER TABLE game ADD CONSTRAINT FK_232B318C5DFCD4B8 FOREIGN KEY (winner_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE game ADD CONSTRAINT FK_232B318CB5421D0C FOREIGN KEY (current_turn_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE ship ADD CONSTRAINT FK_FA30EB24E7EC5785 FOREIGN KEY (board_id) REFERENCES board (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
@@ -197,6 +206,9 @@ final class Version20250423082033 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE game DROP CONSTRAINT FK_232B318C5DFCD4B8
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE game DROP CONSTRAINT FK_232B318CB5421D0C
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE ship DROP CONSTRAINT FK_FA30EB24E7EC5785

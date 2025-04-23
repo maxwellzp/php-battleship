@@ -4,27 +4,58 @@
 
 {% block body %}
 
-    <div>
-        <h1>Your board</h1>
-        {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
-            {% for j in 0..9 %}
-                <div>
-                    {{ i~j }}
+
+    <h1>Game #{{ game.id }}</h1>
+    <p>You're playing against <strong>{{ opponent.username }}</strong></p>
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Opponent Board</h2>
+            <div {{ stimulus_controller('game', { gameId: game.id}) }}>
+                <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
+                    {% for row in 0..9 %}
+                        {% for col in 0..9 %}
+                            <div
+                                    {{ stimulus_action('game', 'fire', 'click') }}
+                                    class="border bg-light text-center"
+                                 data-game-x-value="{{ row }}"
+                                 data-game-y-value="{{ col }}"
+                                 style="height: 40px; line-height: 40px;">
+                                &nbsp;
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h2>Your Board</h2>
+            <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
+                {% for row in 0..9 %}
+                    {% for col in 0..9 %}
+                        {% set key = row ~ col %}
+
+                        {% if board[key] is defined and board[key] == 'ship'%}
+                            {% set cellClass = 'bg-primary' %}
+                        {% elseif board[key] is defined and board[key] == 'hit' %}
+                            {% set cellClass = 'bg-danger' %}
+                        {% else %}
+                            {% set cellClass = 'bg-light' %}
+                        {% endif %}
+
+                        <div class="border text-center {{ cellClass }}"
+                             style="height: 40px; line-height: 40px;">
+                            &nbsp;
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
-    <div>
-        <h1>Enemy board</h1>
-        {% for i in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] %}
-            {% for j in 0..9 %}
-                <div >
-                    {{ i~j }}
-                </div>
-            {% endfor %}
-        {% endfor %}
-    </div>
+
 
     <a class="btn btn-warning" href="#">Surrender</a>
 

@@ -7,6 +7,7 @@ export default class extends Controller {
     static values = {
         orientation: {type: String, default: 'horizontal'},
         url: String,
+        gameId: String,
     };
 
     connect() {
@@ -115,7 +116,7 @@ export default class extends Controller {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.ships.getPlacements()),
-        }).then(res => res.ok ? location.href = "/" : alert("Error saving ships"));
+        }).then(res => res.ok ? location.href = "/game/" + this.gameIdValue + "/lobby" : alert("Error saving ships"));
     }
 
 }

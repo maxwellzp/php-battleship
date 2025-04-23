@@ -11,7 +11,8 @@
     <div class="row">
         <div class="col-6">
             <div {{ stimulus_controller('placement', {
-                url: path('app_game_ship_placement_save', { id: game.id })
+                url: path('app_game_ship_placement_save', { id: game.id }),
+                gameId: game.id
             }
             ) }}>
 
@@ -49,8 +50,8 @@
                         {% for col in 0..9 %}
                             <div
                                     {{ stimulus_action('placement', 'placeShip', 'click') }}
-                                    data-board-x-value="{{ col }}"
-                                    data-board-y-value="{{ row }}"
+                                    data-board-x-value="{{ row }}"
+                                    data-board-y-value="{{ col }}"
                                     class="border text-center"
                                     style="height: 40px; line-height: 40px;"
                             >

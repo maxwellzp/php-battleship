@@ -36,6 +36,10 @@
                 <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">Place
                     Your Ships</a>
             {% endif %}
+
+            {% if game.playersReady|length == 2 %}
+                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_play', { id: game.id}) }}">Start game</a>
+            {% endif %}
         </div>
     </div>
 
