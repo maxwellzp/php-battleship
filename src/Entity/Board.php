@@ -36,6 +36,10 @@ class Board
     #[ORM\JoinColumn(nullable: false)]
     private ?Game $game = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $player = null;
+
     public function __construct()
     {
         $this->shots = new ArrayCollection();
@@ -108,6 +112,18 @@ class Board
     public function setGame(?Game $game): static
     {
         $this->game = $game;
+
+        return $this;
+    }
+
+    public function getPlayer(): ?User
+    {
+        return $this->player;
+    }
+
+    public function setPlayer(?User $player): static
+    {
+        $this->player = $player;
 
         return $this;
     }

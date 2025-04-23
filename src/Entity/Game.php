@@ -107,7 +107,7 @@ class Game
 
     public function addPlayerReady(?Uuid $uuid): static
     {
-        $this->playersReady[$uuid] = $uuid;
+        $this->playersReady[$uuid->toString()] = $uuid;
         return $this;
     }
 
