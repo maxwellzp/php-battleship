@@ -5,7 +5,7 @@ import { findCell, markCells, unmarkCells } from "../helpers/board_helpers";
 export default class extends Controller {
     static targets = ['orientationHorizontal', 'orientationVertical'];
     static values = {
-        orientation: {type: String, default: 'horizontal'},
+        orientation: String,
         url: String,
         gameId: String,
     };

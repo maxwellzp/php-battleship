@@ -3,25 +3,39 @@
 {% block title %}{% endblock %}
 
 {% block body %}
+    <p>Game #{{ game.id }}</p>
 
+    {% if game.winner %}
+        <div class="alert alert-success">Winner: {{ game.winner.username }}</div>
+    {% endif %}
 
-    <h1>Game #{{ game.id }}</h1>
+    <p>Next turn: <strong>{{ game.currentTurn.username }}</strong></p>
+
     <p>You're playing against <strong>{{ opponent.username }}</strong></p>
 
+    <hr>
 
     <div class="row">
         <div class="col-md-6">
-            <h2>Opponent Board</h2>
+            <h5>Opponent Board</h5>
             <div {{ stimulus_controller('game', { gameId: game.id}) }}>
                 <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
                     {% for row in 0..9 %}
                         {% for col in 0..9 %}
+                            {% set key = col ~ row %}
+
+                            {% if opponentBoardInfo[key] is defined and opponentBoardInfo[key] == 'hit' %}
+                                {% set cellClass = 'bg-danger' %}
+                            {% else %}
+                                {% set cellClass = 'bg-light' %}
+                            {% endif %}
+
                             <div
                                     {{ stimulus_action('game', 'fire', 'click') }}
-                                    class="border bg-light text-center"
-                                 data-game-x-value="{{ row }}"
-                                 data-game-y-value="{{ col }}"
-                                 style="height: 40px; line-height: 40px;">
+                                    class="border text-center {{ cellClass }}"
+                                    data-game-x-value="{{ col }}"
+                                    data-game-y-value="{{ row }}"
+                                    style="height: 40px; line-height: 40px;">
                                 &nbsp;
                             </div>
                         {% endfor %}
@@ -31,15 +45,15 @@
         </div>
 
         <div class="col-md-6">
-            <h2>Your Board</h2>
+            <h5>Your Board</h5>
             <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
                 {% for row in 0..9 %}
                     {% for col in 0..9 %}
-                        {% set key = row ~ col %}
+                        {% set key = col ~ row %}
 
-                        {% if board[key] is defined and board[key] == 'ship'%}
+                        {% if yourBoardInfo[key] is defined and yourBoardInfo[key] == 'ship' %}
                             {% set cellClass = 'bg-primary' %}
-                        {% elseif board[key] is defined and board[key] == 'hit' %}
+                        {% elseif yourBoardInfo[key] is defined and yourBoardInfo[key] == 'hit' %}
                             {% set cellClass = 'bg-danger' %}
                         {% else %}
                             {% set cellClass = 'bg-light' %}
@@ -55,9 +69,14 @@
         </div>
     </div>
 
+    <div class="row mt-3">
+        <form action="{{ path('app_game_surrender', { id: game.id}) }}" method="POST">
+            <button class="btn btn-warning" type="submit">Surrender</button>
+        </form>
+    </div>
 
 
-    <a class="btn btn-warning" href="#">Surrender</a>
+
 
     <h3>Game events</h3>
     <ul>

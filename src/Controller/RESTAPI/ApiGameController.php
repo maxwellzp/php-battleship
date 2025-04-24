@@ -9,6 +9,7 @@ use App\DTO\ShipDTO;
 use App\Entity\Game;
 use App\Entity\Shot;
 use App\Entity\User;
+use App\Enum\GameStatus;
 use App\Enum\ShotResult;
 use App\Factory\BoardFactory;
 use App\Factory\ShipFactory;
@@ -52,6 +53,12 @@ final class ApiGameController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        // Validate and place
+//        if (!$board->canPlaceShip($ship)) {
+//            throw new BadRequestHttpException('Invalid ship placement');
+//        }
+
+
         $board = $boardFactory->create($game, $user);
         $entityManager->persist($board);
         $entityManager->flush();
@@ -67,6 +74,9 @@ final class ApiGameController extends AbstractController
         }
 
         $game->addPlayerReady($user->getId());
+        if (count($game->getPlayersReady()) == 2) {
+            $game->setStatus(GameStatus::IN_PROGRESS);
+        }
         $this->entityManager->persist($game);
 
         $entityManager->flush();
@@ -100,6 +110,14 @@ final class ApiGameController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        if ($game->getStatus() !== GameStatus::PLACING_SHIPS) {
+            //TODO redirect to Lobby
+        }
+
+        if ($game->getCurrentTurn() !== $user) {
+            return new JsonResponse(['error' => 'Not your turn'], 403);
+        }
+
         $playerOpponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
 
         $opponentBoard = $boardRepository->findOneBy([
@@ -118,6 +136,16 @@ final class ApiGameController extends AbstractController
             return $this->json(['error' => 'Already fired there'], 400);
         }
 
+        $shotResult = ShotResult::MISS;
+
+        foreach ($opponentBoard->getShips() as $ship) {
+            foreach ($ship->getCoordinates() as $coord) {
+                if ($coord->x == $shotCoordinates->x && $coord->y == $shotCoordinates->y) {
+                    $shotResult = ShotResult::HIT;
+                }
+            }
+        }
+
 
         $shot = new Shot();
         $shot->setBoard($opponentBoard);
@@ -125,13 +153,21 @@ final class ApiGameController extends AbstractController
         $shot->setX($shotCoordinates->x);
         $shot->setY($shotCoordinates->y);
         $shot->setFiredAt(new \DateTimeImmutable());
-        $shot->setResult(ShotResult::HIT);
+        $shot->setResult($shotResult);
 
         $em->persist($shot);
 
         $game->setCurrentTurn($playerOpponent);
         $em->flush();
 
-        return $this->json(['status' => 'ok']);
+
+        if ($game->getWinner() instanceof User) {
+            $game->setStatus(GameStatus::GAME_FINISHED);
+            $game->setFinishedAt(new \DateTimeImmutable());
+            $em->persist($game);
+            $em->flush();
+        }
+
+        return $this->json(['status' => 'ok', 'hit' => $shotResult->value]);
     }
 }

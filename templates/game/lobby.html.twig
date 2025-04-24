@@ -4,43 +4,63 @@
 
 {% block body %}
 
-    <div class="row py-5">
+    {% if game.status.value == 'waiting_for_another_player' or game.status.value == 'placing_ships' %}
+        <div class="row py-5">
 
-    <div class="col">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Player #</th>
-                <th>Username</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Player 1</td>
-                <td>{{ game.player1.username }}</td>
-                <td>Waiting for Player 2...</td>
-            </tr>
-            <tr>
-                <td>Player 2</td>
-                <td>{{ game.player2 ? game.player2.username }}</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+        <div class="col">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Player #</th>
+                    <th>Username</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Player 1</td>
+                    <td>{{ game.player1.username }}</td>
+                    <td>Waiting for Player 2...</td>
+                </tr>
+                <tr>
+                    <td>Player 2</td>
+                    <td>{{ game.player2 ? game.player2.username }}</td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 
     <div class="row">
         <div class="col-12">
-            {% if game.status.value == 'active' %}
-                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">Place
-                    Your Ships</a>
+            {% if game.status.value == 'placing_ships' %}
+                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">
+                    Place Your Ships</a>
             {% endif %}
 
-            {% if game.playersReady|length == 2 %}
-                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_play', { id: game.id}) }}">Start game</a>
+            {% if game.status.value == 'in_progress' %}
+                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_play', { id: game.id}) }}">Start
+                    game</a>
             {% endif %}
         </div>
     </div>
+
+    {% if game.status.value == 'game_finished' %}
+        <div class="row">
+            <div class="card" style="width: 30rem;">
+                <div class="card-header">
+                    Game statistics
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Player 1</strong>: {{ game.player1.username }}</li>
+                    <li class="list-group-item"><strong>Player 2</strong>: {{ game.player2.username }}</li>
+                    <li class="list-group-item"><strong>Winner</strong>: {{ game.winner.username }}</li>
+                    <li class="list-group-item"><strong>Game finished
+                            at</strong>: {{ game.finishedAt.format('Y-m-d H:i:s') }}</li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock %}

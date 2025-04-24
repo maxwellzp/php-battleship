@@ -40,9 +40,16 @@ class Board
     #[ORM\JoinColumn(nullable: false)]
     private ?User $player = null;
 
+    /**
+     * @var Collection<int, Ship>
+     */
+    #[ORM\OneToMany(targetEntity: Ship::class, mappedBy: 'board', orphanRemoval: true)]
+    private Collection $ships;
+
     public function __construct()
     {
         $this->shots = new ArrayCollection();
+        $this->ships = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -126,5 +133,62 @@ class Board
         $this->player = $player;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Ship>
+     */
+    public function getShips(): Collection
+    {
+        return $this->ships;
+    }
+
+    public function addShip(Ship $ship): static
+    {
+        if (!$this->ships->contains($ship)) {
+            $this->ships->add($ship);
+            $ship->setBoard($this);
+        }
+
+        return $this;
+    }
+
+    public function removeShip(Ship $ship): static
+    {
+        if ($this->ships->removeElement($ship)) {
+            // set the owning side to null (unless already changed)
+            if ($ship->getBoard() === $this) {
+                $ship->setBoard(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function hasShipAt(int $x, int $y): bool
+    {
+        foreach ($this->ships as $ship) {
+            foreach ($ship->getCoordinates() as $coord) {
+                if ($coord['x'] === $x && $coord['y'] === $y) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function canPlaceShip(Ship $ship): bool
+    {
+        foreach ($ship->getCoordinates() as $coord) {
+            if ($coord['x'] < 0 || $coord['x'] >= 10 || $coord['y'] < 0 || $coord['y'] >= 10) {
+                return false;
+            }
+
+            if ($this->hasShipAt($coord['x'], $coord['y'])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

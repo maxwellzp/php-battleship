@@ -10,6 +10,7 @@ use App\Enum\GameStatus;
 use App\Repository\BoardRepository;
 use App\Repository\GameRepository;
 use App\Repository\ShipRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -36,8 +37,8 @@ final class GameController extends AbstractController
     {
         $newGame = new Game();
         $newGame->setPlayer1($user);
-        $newGame->setCurrentTurn($user);
-        $newGame->setStatus(GameStatus::WAITING);
+        $newGame->setCurrentTurn($user); // TODO: Add random choice
+        $newGame->setStatus(GameStatus::WAITING_FOR_ANOTHER_PLAYER);
         $newGame->setCreatedAt(new \DateTimeImmutable());
         $gameRepository->save($newGame, true);
 
@@ -63,8 +64,13 @@ final class GameController extends AbstractController
         GameRepository $gameRepository
     ): Response
     {
+        if ($game->getPlayer2() || $game->getPlayer1() === $user) {
+            return $this->redirectToRoute('app_game_index');
+        }
+
         $game->setPlayer2($user);
-        $game->setStatus(GameStatus::ACTIVE);
+        $game->setStatus(GameStatus::PLACING_SHIPS);
+        // $game->setCurrentTurn($game->getPlayer1());
         $gameRepository->save($game, true);
 
         return $this->redirectToRoute('app_game_lobby', [
@@ -93,46 +99,65 @@ final class GameController extends AbstractController
         ShipRepository $shipRepository
     ): Response
     {
-        $player1 = $game->getPlayer1();
-        $player2 = $game->getPlayer2();
-
-        $board1 = $boardRepository->findOneBy([
-            'player' => $player1,
+        $you = $user;
+        $yourBoard = $boardRepository->findOneBy([
+            'player' => $user,
             'game' => $game,
         ]);
-        $board2 = $boardRepository->findOneBy([
-            'player' => $player2,
-            'game' => $game,
+        $yourShips = $shipRepository->findBy([
+            'board' => $yourBoard
         ]);
 
-        $ships1 = $shipRepository->findBy([
-            'board' => $board1
-        ]);
-
-        $ships2 = $shipRepository->findBy([
-            'board' => $board2
-        ]);
-
-        $opponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
-
-        $board = [];
-        foreach ($ships1 as $ship) {
+        $yourBoardInfo = [];
+        foreach ($yourShips as $ship) {
             foreach ($ship->getCoordinates() as $coordinate) {
                 $position = $coordinate->x . $coordinate->y;
-                $board[$position] = 'ship';
+                $yourBoardInfo[$position] = 'ship';
             }
         }
 
-        foreach($board1->getShots() as $shot) {
+        foreach($yourBoard->getShots() as $shot) {
             $position = $shot->getX() . $shot->getY();
-            $board[$position] = 'hit';
+            $yourBoardInfo[$position] = 'hit';
         }
+
+
+
+
+
+
+
+
+        $opponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
+        $opponentBoard = $boardRepository->findOneBy([
+            'player' => $opponent,
+            'game' => $game,
+        ]);
+        $opponentShips = $shipRepository->findBy([
+            'board' => $opponentBoard
+        ]);
+
+
+        $opponentBoardInfo = [];
+//        foreach ($opponentShips as $ship) {
+//            foreach ($ship->getCoordinates() as $coordinate) {
+//                $position = $coordinate->x . $coordinate->y;
+//                $opponentBoardInfo[$position] = 'ship';
+//            }
+//        }
+
+        foreach($opponentBoard->getShots() as $shot) {
+            $position = $shot->getX() . $shot->getY();
+            $opponentBoardInfo[$position] = 'hit';
+        }
+
 
 
         return $this->render('/game/play.html.twig', [
             'game' => $game,
             'opponent' => $opponent,
-            'board' => $board
+            'opponentBoardInfo' => $opponentBoardInfo,
+            'yourBoardInfo' => $yourBoardInfo
         ]);
     }
 
@@ -156,5 +181,27 @@ final class GameController extends AbstractController
         $gameRepository->save($game, true);
 
         return new Response();
+    }
+
+    #[Route('/game/{id}/surrender', name: 'app_game_surrender', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function surrender(
+        #[CurrentUser] User $user,
+        Game $game,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $playerOpponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
+
+        $game->setWinner($playerOpponent);
+        $game->setStatus(GameStatus::GAME_FINISHED);
+        $game->setFinishedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($game);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_game_lobby', [
+            'id' => $game->getId(),
+        ]);
     }
 }

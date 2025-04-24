@@ -12,7 +12,8 @@
         <div class="col-6">
             <div {{ stimulus_controller('placement', {
                 url: path('app_game_ship_placement_save', { id: game.id }),
-                gameId: game.id
+                gameId: game.id,
+                orientation: 'horizontal'
             }
             ) }}>
 
@@ -50,8 +51,8 @@
                         {% for col in 0..9 %}
                             <div
                                     {{ stimulus_action('placement', 'placeShip', 'click') }}
-                                    data-board-x-value="{{ row }}"
-                                    data-board-y-value="{{ col }}"
+                                    data-board-x-value="{{ col }}"
+                                    data-board-y-value="{{ row }}"
                                     class="border text-center"
                                     style="height: 40px; line-height: 40px;"
                             >
@@ -64,15 +65,17 @@
                     <button
                             {{ stimulus_action('placement', 'resetBoard') }}
                             class="btn btn-outline-primary"
-                            >Reset board</button>
+                    >Reset board
+                    </button>
                     <button
                             {{ stimulus_action('placement', 'autoPlacement') }}
                             class="btn btn-outline-primary"
-                            >Auto placement</button>
+                    >Auto placement
+                    </button>
                     <button
                             {{ stimulus_action('placement', 'saveShips') }}
                             class="btn btn-outline-primary"
-                            >Confirm board
+                    >Confirm board
                     </button>
                 </div>
             </div>

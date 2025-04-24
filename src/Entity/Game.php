@@ -48,7 +48,7 @@ class Game
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->status = GameStatus::WAITING;
+        $this->status = GameStatus::WAITING_FOR_ANOTHER_PLAYER;
     }
 
     public function getId(): ?Uuid

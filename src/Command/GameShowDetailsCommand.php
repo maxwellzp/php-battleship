@@ -45,6 +45,8 @@ class GameShowDetailsCommand extends Command
         $io->writeln("Player 2: " . $game->getPlayer2()?->getEmail());
         $io->writeln("Created At: " . $game->getCreatedAt()->format('Y-m-d H:i:s'));
         $io->writeln("Players are ready: " . json_encode($game->getPlayersReady()));
+        $io->writeln("Current turn: " . $game->getCurrentTurn()->getEmail());
+
 
         return Command::SUCCESS;
     }
