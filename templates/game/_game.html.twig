@@ -3,7 +3,7 @@
 <td>{{ game.status.value }}</td>
 <td>{{ game.createdAt.format('Y-m-d H:i:s') }}</td>
 <td>
-    {% if game.player1 != app.user %}
+    {%  if app.user is not null and game.status.value == 'waiting_for_another_player' %}
         <form action="{{ path('app_game_join', { id: game.id }) }}" method="POST">
             <input class="btn btn-outline-primary" type="submit" value="Join Game">
         </form>

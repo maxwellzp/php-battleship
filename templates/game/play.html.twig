@@ -76,16 +76,13 @@
     </div>
 
 
-
-
-    <h3>Game events</h3>
-    <ul>
-        <li>Game started</li>
-        <li>Enemy battleship sunk</li>
-        <li>You attacked: B5 = Miss</li>
-        <li>You attacked: B3 = Hit</li>
-        <li>Enemy attack received: C6 = Miss</li>
-    </ul>
+    <div class="mt-4">
+        <h4 class="mb-2">🎮 Game Events</h4>
+        <div id="game-events-log" class="bg-dark text-light p-3 rounded shadow-sm" style="max-height: 200px; overflow-y: auto; font-family: monospace;">
+            <div>🟢 Game started</div>
+            {# Future entries will go here dynamically #}
+        </div>
+    </div>
 
 
 {% endblock %}

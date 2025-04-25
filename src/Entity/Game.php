@@ -121,6 +121,11 @@ class Game
         return $this;
     }
 
+    public function isPlayerReady(?Uuid $uuid): bool
+    {
+        return in_array($uuid, $this->playersReady);
+    }
+
     public function getWinner(): ?User
     {
         return $this->winner;

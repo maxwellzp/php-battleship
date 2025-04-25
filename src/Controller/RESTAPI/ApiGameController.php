@@ -19,6 +19,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -46,7 +48,8 @@ final class ApiGameController extends AbstractController
         ShipFactory                           $shipFactory,
         BoardFactory                          $boardFactory,
         EntityManagerInterface                $entityManager,
-        #[MapRequestPayload(type: ShipDTO::class)] array $ships
+        #[MapRequestPayload(type: ShipDTO::class)] array $ships,
+        HubInterface $hub
     ): JsonResponse
     {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
@@ -80,6 +83,18 @@ final class ApiGameController extends AbstractController
         $this->entityManager->persist($game);
 
         $entityManager->flush();
+
+        $update = new Update(
+            'http://example.com/update-lobby/' . $game->getId(),
+            json_encode([
+                'status' => $game->getStatus()->value,
+                'gameStartUrl' => $this->generateUrl('app_game_play', ['id' => $game->getId()]),
+            ])
+        );
+
+        $hub->publish($update);
+
+
 
         return new JsonResponse(['status' => 'ok']);
     }

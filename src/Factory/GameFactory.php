@@ -15,7 +15,7 @@ class GameFactory
         $game = new Game();
         $game->setCurrentTurn($user);
         $game->setCreatedAt(new \DateTimeImmutable());
-        $game->setStatus(GameStatus::WAITING);
+        $game->setStatus(GameStatus::WAITING_FOR_ANOTHER_PLAYER);
         return $game;
     }
 }

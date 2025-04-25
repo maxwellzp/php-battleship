@@ -4,6 +4,14 @@
 
 {% block body %}
 
+    <div
+            {{ stimulus_controller('update_lobby', {
+                mercureUrl: mercure('http://example.com/update-lobby/' ~ game.id),
+                isUserLoggedIn: is_granted('IS_AUTHENTICATED_FULLY')
+            }) }}
+
+    >
+
     {% if game.status.value == 'waiting_for_another_player' or game.status.value == 'placing_ships' %}
         <div class="row py-5">
 
@@ -20,12 +28,32 @@
                 <tr>
                     <td>Player 1</td>
                     <td>{{ game.player1.username }}</td>
-                    <td>Waiting for Player 2...</td>
+                    <td
+                            {{ stimulus_target('update_lobby', 'player1Status') }}
+                    >
+                        {% if game.status.value == 'waiting_for_another_player' %}
+                            Waiting for Player 2...
+                        {% elseif game.status.value == 'placing_ships' %}
+                            The player is ready to place ships.
+                        {% elseif game.status.value == 'in_progress' and game.isPlayerReady(app.user.id)%}
+                            Player 1 has finished placing ships
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Player 2</td>
-                    <td>{{ game.player2 ? game.player2.username }}</td>
-                    <td></td>
+                    <td
+                            {{ stimulus_target('update_lobby', 'player2Username') }}
+                    >{{ game.player2 ? game.player2.username }}</td>
+                    <td
+                            {{ stimulus_target('update_lobby', 'player2Status') }}
+                    >
+                        {% if game.status.value == 'placing_ships' %}
+                            The player is ready to place ships.
+                        {% elseif game.isPlayerReady(app.user.id)%}
+                            Player 2 has finished placing ships
+                        {% endif %}
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -33,18 +61,27 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-12">
-            {% if game.status.value == 'placing_ships' %}
+        <div
+                {{ stimulus_target('update_lobby', 'lobbyButton') }}
+                class="col-12"
+        >
+            {% if game.status.value == 'placing_ships' and not game.isPlayerReady(app.user.id) %}
                 <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">
-                    Place Your Ships</a>
+                    Place Your Ships
+                </a>
             {% endif %}
 
             {% if game.status.value == 'in_progress' %}
-                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_play', { id: game.id}) }}">Start
-                    game</a>
+                <a class="btn btn-outline-primary my-3" href="{{ path('app_game_play', { id: game.id}) }}">
+                    Start game
+                </a>
             {% endif %}
         </div>
     </div>
+        </div>
+
+
+
 
     {% if game.status.value == 'game_finished' %}
         <div class="row">

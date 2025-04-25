@@ -13,6 +13,8 @@ use App\Repository\ShipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -32,7 +34,8 @@ final class GameController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function createGame(
         #[CurrentUser] User $user,
-        GameRepository $gameRepository
+        GameRepository $gameRepository,
+        HubInterface $hub
     ): Response
     {
         $newGame = new Game();
@@ -41,6 +44,19 @@ final class GameController extends AbstractController
         $newGame->setStatus(GameStatus::WAITING_FOR_ANOTHER_PLAYER);
         $newGame->setCreatedAt(new \DateTimeImmutable());
         $gameRepository->save($newGame, true);
+
+        $update = new Update(
+            'http://example.com/new-game',
+            json_encode([
+                'gameId' => $newGame->getId(),
+                'player1' => $newGame->getPlayer1()->getUsername(),
+                'status' => $newGame->getStatus()->value,
+                'createdAt' => $newGame->getCreatedAt()->format('Y-m-d H:i:s'),
+                'joinPath' => $this->generateUrl('app_game_join', ['id' => $newGame->getId()]),
+            ])
+        );
+
+        $hub->publish($update);
 
         return $this->redirectToRoute('app_game_lobby', [
             'id' => $newGame->getId(),
@@ -61,7 +77,8 @@ final class GameController extends AbstractController
     public function joinGame(
         #[CurrentUser] User $user,
         Game $game,
-        GameRepository $gameRepository
+        GameRepository $gameRepository,
+        HubInterface $hub
     ): Response
     {
         if ($game->getPlayer2() || $game->getPlayer1() === $user) {
@@ -72,6 +89,20 @@ final class GameController extends AbstractController
         $game->setStatus(GameStatus::PLACING_SHIPS);
         // $game->setCurrentTurn($game->getPlayer1());
         $gameRepository->save($game, true);
+
+
+
+        $update = new Update(
+            'http://example.com/update-lobby/' . $game->getId(),
+            json_encode([
+                'player2Username' => $game->getPlayer2()->getUsername(),
+                'status' => $game->getStatus()->value,
+                'shipPlacementUrl' => $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()]),
+            ])
+        );
+
+        $hub->publish($update);
+
 
         return $this->redirectToRoute('app_game_lobby', [
             'id' => $game->getId(),
@@ -123,11 +154,6 @@ final class GameController extends AbstractController
 
 
 
-
-
-
-
-
         $opponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
         $opponentBoard = $boardRepository->findOneBy([
             'player' => $opponent,
@@ -139,12 +165,6 @@ final class GameController extends AbstractController
 
 
         $opponentBoardInfo = [];
-//        foreach ($opponentShips as $ship) {
-//            foreach ($ship->getCoordinates() as $coordinate) {
-//                $position = $coordinate->x . $coordinate->y;
-//                $opponentBoardInfo[$position] = 'ship';
-//            }
-//        }
 
         foreach($opponentBoard->getShots() as $shot) {
             $position = $shot->getX() . $shot->getY();
