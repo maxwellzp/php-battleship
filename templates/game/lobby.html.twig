@@ -12,7 +12,7 @@
 
     >
 
-    {% if game.status.value == 'waiting_for_another_player' or game.status.value == 'placing_ships' %}
+    {% if game.status.value == 'waiting_for_another_player' or game.status.value == 'placing_ships' or game.status.value == 'in_progress' %}
         <div class="row py-5">
 
         <div class="col">
@@ -33,9 +33,9 @@
                     >
                         {% if game.status.value == 'waiting_for_another_player' %}
                             Waiting for Player 2...
-                        {% elseif game.status.value == 'placing_ships' %}
+                        {% elseif game.status.value == 'placing_ships' and game.isPlayerReady(game.player1.id) != true %}
                             The player is ready to place ships.
-                        {% elseif game.status.value == 'in_progress' and game.isPlayerReady(app.user.id)%}
+                        {% elseif game.isPlayerReady(game.player1.id) %}
                             Player 1 has finished placing ships
                         {% endif %}
                     </td>
@@ -48,9 +48,9 @@
                     <td
                             {{ stimulus_target('update_lobby', 'player2Status') }}
                     >
-                        {% if game.status.value == 'placing_ships' %}
+                        {% if game.status.value == 'placing_ships' and game.isPlayerReady(game.player2.id) != true %}
                             The player is ready to place ships.
-                        {% elseif game.isPlayerReady(app.user.id)%}
+                        {% elseif game.player2 is not null and game.isPlayerReady(game.player2.id)%}
                             Player 2 has finished placing ships
                         {% endif %}
                     </td>
@@ -65,7 +65,7 @@
                 {{ stimulus_target('update_lobby', 'lobbyButton') }}
                 class="col-12"
         >
-            {% if game.status.value == 'placing_ships' and not game.isPlayerReady(app.user.id) %}
+            {% if game.status.value == 'placing_ships' and game.isPlayerReady(app.user.id) != true %}
                 <a class="btn btn-outline-primary my-3" href="{{ path('app_game_ship_placement', { id: game.id }) }}">
                     Place Your Ships
                 </a>

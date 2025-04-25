@@ -79,8 +79,9 @@
     <div class="mt-4">
         <h4 class="mb-2">🎮 Game Events</h4>
         <div id="game-events-log" class="bg-dark text-light p-3 rounded shadow-sm" style="max-height: 200px; overflow-y: auto; font-family: monospace;">
-            <div>🟢 Game started</div>
-            {# Future entries will go here dynamically #}
+            {% for log in gameLogs %}
+                <div>🟢 {{ log.message }}</div>
+            {% endfor %}
         </div>
     </div>
 

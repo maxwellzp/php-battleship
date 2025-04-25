@@ -41,8 +41,8 @@ class GameShowDetailsCommand extends Command
         $io->writeln("Id: " . $game->getId());
         $io->writeln("Status: " . $game->getStatus()->value);
         $io->writeln("Winner: " . $game->getWinner()?->getEmail());
-        $io->writeln("Player 1: " . $game->getPlayer1()?->getEmail());
-        $io->writeln("Player 2: " . $game->getPlayer2()?->getEmail());
+        $io->writeln("Player 1: " . $game->getPlayer1()?->getEmail() . " | " .  $game->getPlayer1()->getId());
+        $io->writeln("Player 2: " . $game->getPlayer2()?->getEmail() . " | " . $game->getPlayer2()->getId());
         $io->writeln("Created At: " . $game->getCreatedAt()->format('Y-m-d H:i:s'));
         $io->writeln("Players are ready: " . json_encode($game->getPlayersReady()));
         $io->writeln("Current turn: " . $game->getCurrentTurn()->getEmail());

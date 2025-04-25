@@ -8,6 +8,7 @@ use App\Entity\Game;
 use App\Entity\User;
 use App\Enum\GameStatus;
 use App\Repository\BoardRepository;
+use App\Repository\GameLogRepository;
 use App\Repository\GameRepository;
 use App\Repository\ShipRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -127,7 +128,8 @@ final class GameController extends AbstractController
         #[CurrentUser] User $user,
         Game $game,
         BoardRepository $boardRepository,
-        ShipRepository $shipRepository
+        ShipRepository $shipRepository,
+        GameLogRepository $gameLogRepository,
     ): Response
     {
         $you = $user;
@@ -171,13 +173,17 @@ final class GameController extends AbstractController
             $opponentBoardInfo[$position] = 'hit';
         }
 
+        $gameLogs = $gameLogRepository->findBy([
+            'game' => $game,
+        ]);
 
 
         return $this->render('/game/play.html.twig', [
             'game' => $game,
             'opponent' => $opponent,
             'opponentBoardInfo' => $opponentBoardInfo,
-            'yourBoardInfo' => $yourBoardInfo
+            'yourBoardInfo' => $yourBoardInfo,
+            'gameLogs' => $gameLogs
         ]);
     }
 

@@ -7,6 +7,7 @@ namespace App\Controller\RESTAPI;
 use App\DTO\CoordinateDTO;
 use App\DTO\ShipDTO;
 use App\Entity\Game;
+use App\Entity\GameLog;
 use App\Entity\Shot;
 use App\Entity\User;
 use App\Enum\GameStatus;
@@ -16,6 +17,7 @@ use App\Factory\ShipFactory;
 use App\Repository\BoardRepository;
 use App\Repository\ShotRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -49,7 +51,8 @@ final class ApiGameController extends AbstractController
         BoardFactory                          $boardFactory,
         EntityManagerInterface                $entityManager,
         #[MapRequestPayload(type: ShipDTO::class)] array $ships,
-        HubInterface $hub
+        HubInterface $hub,
+        LoggerInterface $logger,
     ): JsonResponse
     {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
@@ -75,26 +78,78 @@ final class ApiGameController extends AbstractController
             );
             $entityManager->persist($ship);
         }
-
         $game->addPlayerReady($user->getId());
-        if (count($game->getPlayersReady()) == 2) {
-            $game->setStatus(GameStatus::IN_PROGRESS);
-        }
-        $this->entityManager->persist($game);
-
+        $entityManager->persist($game);
         $entityManager->flush();
 
-        $update = new Update(
-            'http://example.com/update-lobby/' . $game->getId(),
-            json_encode([
-                'status' => $game->getStatus()->value,
-                'gameStartUrl' => $this->generateUrl('app_game_play', ['id' => $game->getId()]),
-            ])
-        );
-
-        $hub->publish($update);
+        $logger->critical("______Count: " . count($game->getPlayersReady()));
 
 
+        if (count($game->getPlayersReady()) == 1) {
+            // We need to change Status for the player who placed its ships
+            // for another player who is still on Lobby page.
+            // Browser of Player 1:  Player 1 has finished placing ships (Which is correct one).
+            // Browser of Player 2: The player is ready to place ships.
+
+            $readyPlayerUuid = $game->getPlayersReady()[0];
+            $statusMsg = '';
+            $player = -1;
+            if ($readyPlayerUuid === $game->getPlayer1()->getId()) {
+                $player = 1;
+                $statusMsg = 'Player 1 has finished placing ships ';
+            }
+
+            if ($readyPlayerUuid === $game->getPlayer2()->getId()) {
+                $player = 2;
+                $statusMsg = ' Player 2 has finished placing ships ';
+            }
+
+            $update = new Update(
+                'http://example.com/update-lobby/' . $game->getId(),
+                json_encode([
+                    'status' => 'one_player_ready',
+                    'player' => $player,
+                    'statusMsg' => $statusMsg
+                ])
+            );
+
+            $hub->publish($update);
+        }
+
+
+
+        if (count($game->getPlayersReady()) == 2) {
+            $game->setStatus(GameStatus::IN_PROGRESS);
+            $this->entityManager->persist($game);
+            $entityManager->flush();
+
+            $readyPlayerUuid = $game->getPlayersReady()[1];
+            $statusMsg = '';
+            $player = -1;
+
+            if ($readyPlayerUuid === $game->getPlayer1()->getId()) {
+                $player = 1;
+                $statusMsg = 'Player 1 has finished placing ships ';
+            }
+
+            if ($readyPlayerUuid === $game->getPlayer2()->getId()) {
+                $player = 2;
+                $statusMsg = ' Player 2 has finished placing ships ';
+            }
+
+
+            $update = new Update(
+                'http://example.com/update-lobby/' . $game->getId(),
+                json_encode([
+                    'status' => $game->getStatus()->value,
+                    'player' => $player,
+                    'statusMsg' => $statusMsg,
+                    'gameStartUrl' => $this->generateUrl('app_game_play', ['id' => $game->getId()]),
+                ])
+            );
+
+            $hub->publish($update);
+        }
 
         return new JsonResponse(['status' => 'ok']);
     }
@@ -118,6 +173,7 @@ final class ApiGameController extends AbstractController
 
         BoardRepository $boardRepository,
         ShotRepository $shotRepository,
+        HubInterface $hub,
 
     ): JsonResponse
     {
@@ -132,6 +188,21 @@ final class ApiGameController extends AbstractController
         if ($game->getCurrentTurn() !== $user) {
             return new JsonResponse(['error' => 'Not your turn'], 403);
         }
+
+        $gameLog = new GameLog();
+        $gameLog->setGame($game);
+        $gameLog->setMessage(sprintf('Shooting at %d-%d', $shotCoordinates->x, $shotCoordinates->y));
+        $this->entityManager->persist($gameLog);
+        $this->entityManager->flush();
+
+        $update = new Update(
+            'http://example.com/game-logs/' . $game->getId(),
+            json_encode([
+                'message' => $gameLog->getMessage(),
+            ])
+        );
+
+        $hub->publish($update);
 
         $playerOpponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
 

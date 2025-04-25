@@ -111,19 +111,19 @@ class Game
 
     public function addPlayerReady(?Uuid $uuid): static
     {
-        $this->playersReady[$uuid->toString()] = $uuid;
+        $this->playersReady[] = $uuid;
         return $this;
     }
 
     public function removePlayerReady(?Uuid $uuid): static
     {
-        unset($this->playersReady[$uuid]);
+        unset($this->playersReady[$uuid->toString()]);
         return $this;
     }
 
     public function isPlayerReady(?Uuid $uuid): bool
     {
-        return in_array($uuid, $this->playersReady);
+        return in_array($uuid->toString(), $this->playersReady);
     }
 
     public function getWinner(): ?User
