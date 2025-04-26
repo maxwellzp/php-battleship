@@ -4,39 +4,38 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Entity\Board;
-use App\Entity\Shot;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Game;
+use App\Entity\User;
+use App\Enum\GameStatus;
+use App\Factory\GameFactory;
+use App\Repository\GameRepository;
 
 class GameService
 {
     public function __construct(
-        private readonly MercureService         $mercureService,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly GameFactory         $gameFactory,
+        private readonly GameRepository      $gameRepository,
     )
     {
 
     }
 
-    public function checkWinner(Board $board): bool
+    public function createNewGame(User $user): Game
     {
-        $isSunkAll = true;
-        foreach ($board->getShips() as $ship) {
-            $coords = $ship->getCoordinates();
-            $hits = $this->entityManager->getRepository(Shot::class)->findBy([
-                'board' => $board,
-                'hit' => true
-            ]);
+        $game = $this->gameFactory->create($user);
+        $this->gameRepository->save($game, true);
+        return $game;
+    }
 
-            $hitCoords = array_map(fn($s) => ['x' => $s->getX(), 'y' => $s->getY()], $hits);
+    public function joinGame(Game $game, User $user): Game
+    {
+        $game->setPlayer2($user);
+        $game->setStatus(GameStatus::PLACING_SHIPS);
 
-            foreach ($coords as $coord) {
-                if (!in_array($coord, $hitCoords)) {
-                    $isSunkAll = false;
-                    break 2;
-                }
-            }
-        }
-        return $isSunkAll;
+        $firstPlayer = random_int(0, 1) ? $game->getPlayer1() : $game->getPlayer2();
+        $game->setCurrentTurn($firstPlayer);
+
+        $this->gameRepository->save($game, true);
+        return $game;
     }
 }
