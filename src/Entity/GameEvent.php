@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\GameLogRepository;
+use App\Repository\GameEventRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: GameLogRepository::class)]
-class GameLog
+#[ORM\Entity(repositoryClass: GameEventRepository::class)]
+class GameEvent
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
