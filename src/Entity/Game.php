@@ -42,7 +42,7 @@ class Game
     private ?\DateTimeImmutable $finishedAt = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $currentTurn = null;
 
     public function __construct()
@@ -160,5 +160,10 @@ class Game
         $this->currentTurn = $currentTurn;
 
         return $this;
+    }
+
+    public function getOpponent(User $user): ?User
+    {
+        return $user === $this->player1 ? $this->player2 : $this->player1;
     }
 }
