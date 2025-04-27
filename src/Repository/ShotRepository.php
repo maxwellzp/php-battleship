@@ -16,28 +16,12 @@ class ShotRepository extends ServiceEntityRepository
         parent::__construct($registry, Shot::class);
     }
 
-    //    /**
-    //     * @return Shot[] Returns an array of Shot objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function save(Shot $shot, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($shot);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 
-    //    public function findOneBySomeField($value): ?Shot
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

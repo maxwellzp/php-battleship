@@ -17,29 +17,11 @@ class BoardRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Board::class);
     }
-
-    //    /**
-    //     * @return Board[] Returns an array of Board objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('b')
-    //            ->andWhere('b.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('b.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Board
-    //    {
-    //        return $this->createQueryBuilder('b')
-    //            ->andWhere('b.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function save(Board $board, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($board);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }

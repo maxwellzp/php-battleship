@@ -2,23 +2,23 @@
 
 namespace App\Repository;
 
-use App\Entity\GameLog;
+use App\Entity\GameEvent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<GameLog>
+ * @extends ServiceEntityRepository<GameEvent>
  */
-class GameLogRepository extends ServiceEntityRepository
+class GameEventRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, GameLog::class);
+        parent::__construct($registry, GameEvent::class);
     }
 
-    public function save(GameLog $gameLog, bool $flush = false): void
+    public function save(GameEvent $GameEvent, bool $flush = false): void
     {
-        $this->getEntityManager()->persist($gameLog);
+        $this->getEntityManager()->persist($GameEvent);
         if ($flush) {
             $this->getEntityManager()->flush();
         }
