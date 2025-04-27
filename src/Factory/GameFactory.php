@@ -13,9 +13,9 @@ class GameFactory
     public function create(User $user): Game
     {
         $game = new Game();
-        $game->setCurrentTurn($user);
-        $game->setCreatedAt(new \DateTimeImmutable());
+        $game->setPlayer1($user);
         $game->setStatus(GameStatus::WAITING_FOR_ANOTHER_PLAYER);
+        $game->setCreatedAt(new \DateTimeImmutable());
         return $game;
     }
 }
