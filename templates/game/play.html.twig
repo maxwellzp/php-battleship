@@ -20,23 +20,25 @@
             <h5>Opponent Board</h5>
             <div {{ stimulus_controller('game', { gameId: game.id}) }}>
                 <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
-                    {% for row in 0..9 %}
-                        {% for col in 0..9 %}
-                            {% set key = col ~ row %}
-
-                            {% if opponentBoardInfo[key] is defined and opponentBoardInfo[key] == 'hit' %}
-                                {% set cellClass = 'bg-danger' %}
-                            {% else %}
-                                {% set cellClass = 'bg-light' %}
-                            {% endif %}
+                    {% for row in opponentBoard %}
+                        {% for cell in row %}
 
                             <div
                                     {{ stimulus_action('game', 'fire', 'click') }}
-                                    class="border text-center {{ cellClass }}"
-                                    data-game-x-value="{{ col }}"
-                                    data-game-y-value="{{ row }}"
-                                    style="height: 40px; line-height: 40px;">
-                                &nbsp;
+                                    class="border text-center
+{% if cell.hit %} bg-danger text-white {% elseif cell.miss %} bg-light {% else %} bg-white {% endif %}
+"
+                                    data-game-x-value="{{ cell.x }}"
+                                    data-game-y-value="{{ cell.y }}"
+                                    style="height: 40px; line-height: 40px;"
+                            >
+                                {% if cell.hit %}
+                                    X
+                                {% elseif cell.miss %}
+                                    O
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
                             </div>
                         {% endfor %}
                     {% endfor %}
@@ -47,21 +49,25 @@
         <div class="col-md-6">
             <h5>Your Board</h5>
             <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
-                {% for row in 0..9 %}
-                    {% for col in 0..9 %}
-                        {% set key = col ~ row %}
+                {% for row in yourBoard %}
+                    {% for cell in row %}
 
-                        {% if yourBoardInfo[key] is defined and yourBoardInfo[key] == 'ship' %}
-                            {% set cellClass = 'bg-primary' %}
-                        {% elseif yourBoardInfo[key] is defined and yourBoardInfo[key] == 'hit' %}
-                            {% set cellClass = 'bg-danger' %}
-                        {% else %}
-                            {% set cellClass = 'bg-light' %}
+                        <div class="border text-center
+                        {% if cell.hit and cell.ship %} bg-danger text-white
+                        {% elseif cell.hit %} bg-secondary text-white
+                        {% elseif cell.ship %} bg-primary text-white
+                        {% else %} bg-light
                         {% endif %}
-
-                        <div class="border text-center {{ cellClass }}"
-                             style="height: 40px; line-height: 40px;">
-                            &nbsp;
+                        "
+                             style="height: 40px; line-height: 40px;"
+                        >
+                            {% if cell.hit and cell.ship %}
+                                X
+                            {% elseif cell.miss %}
+                                O
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
                         </div>
                     {% endfor %}
                 {% endfor %}

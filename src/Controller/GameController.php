@@ -6,16 +6,13 @@ namespace App\Controller;
 
 use App\Entity\Game;
 use App\Entity\User;
-use App\Enum\GameStatus;
-use App\Repository\BoardRepository;
-use App\Repository\GameLogRepository;
+use App\Repository\GameEventRepository;
 use App\Repository\GameRepository;
-use App\Repository\ShipRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\BoardViewService;
+use App\Service\GameService;
+use App\Service\MercureService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -35,32 +32,15 @@ final class GameController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function createGame(
         #[CurrentUser] User $user,
-        GameRepository $gameRepository,
-        HubInterface $hub
+        GameService $gameService,
+        MercureService $mercureService
     ): Response
     {
-        $newGame = new Game();
-        $newGame->setPlayer1($user);
-        $newGame->setCurrentTurn($user); // TODO: Add random choice
-        $newGame->setStatus(GameStatus::WAITING_FOR_ANOTHER_PLAYER);
-        $newGame->setCreatedAt(new \DateTimeImmutable());
-        $gameRepository->save($newGame, true);
-
-        $update = new Update(
-            'http://example.com/new-game',
-            json_encode([
-                'gameId' => $newGame->getId(),
-                'player1' => $newGame->getPlayer1()->getUsername(),
-                'status' => $newGame->getStatus()->value,
-                'createdAt' => $newGame->getCreatedAt()->format('Y-m-d H:i:s'),
-                'joinPath' => $this->generateUrl('app_game_join', ['id' => $newGame->getId()]),
-            ])
-        );
-
-        $hub->publish($update);
+        $game = $gameService->createNewGame($user);
+        $mercureService->publishNewGame($game, $this->generateUrl('app_game_join', ['id' => $game->getId()]));
 
         return $this->redirectToRoute('app_game_lobby', [
-            'id' => $newGame->getId(),
+            'id' => $game->getId(),
         ]);
     }
 
@@ -78,32 +58,15 @@ final class GameController extends AbstractController
     public function joinGame(
         #[CurrentUser] User $user,
         Game $game,
-        GameRepository $gameRepository,
-        HubInterface $hub
+        GameService $gameService,
+        MercureService $mercureService
     ): Response
     {
         if ($game->getPlayer2() || $game->getPlayer1() === $user) {
             return $this->redirectToRoute('app_game_index');
         }
-
-        $game->setPlayer2($user);
-        $game->setStatus(GameStatus::PLACING_SHIPS);
-        // $game->setCurrentTurn($game->getPlayer1());
-        $gameRepository->save($game, true);
-
-
-
-        $update = new Update(
-            'http://example.com/update-lobby/' . $game->getId(),
-            json_encode([
-                'player2Username' => $game->getPlayer2()->getUsername(),
-                'status' => $game->getStatus()->value,
-                'shipPlacementUrl' => $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()]),
-            ])
-        );
-
-        $hub->publish($update);
-
+        $game = $gameService->joinGame($game, $user);
+        $mercureService->publishJoinedGame($game, $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()]));
 
         return $this->redirectToRoute('app_game_lobby', [
             'id' => $game->getId(),
@@ -127,63 +90,30 @@ final class GameController extends AbstractController
     public function play(
         #[CurrentUser] User $user,
         Game $game,
-        BoardRepository $boardRepository,
-        ShipRepository $shipRepository,
-        GameLogRepository $gameLogRepository,
+        GameEventRepository $gameEventRepository,
+        BoardViewService $boardViewService
     ): Response
     {
-        $you = $user;
-        $yourBoard = $boardRepository->findOneBy([
-            'player' => $user,
-            'game' => $game,
-        ]);
-        $yourShips = $shipRepository->findBy([
-            'board' => $yourBoard
-        ]);
-
-        $yourBoardInfo = [];
-        foreach ($yourShips as $ship) {
-            foreach ($ship->getCoordinates() as $coordinate) {
-                $position = $coordinate->x . $coordinate->y;
-                $yourBoardInfo[$position] = 'ship';
-            }
-        }
-
-        foreach($yourBoard->getShots() as $shot) {
-            $position = $shot->getX() . $shot->getY();
-            $yourBoardInfo[$position] = 'hit';
-        }
-
-
-
         $opponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
-        $opponentBoard = $boardRepository->findOneBy([
-            'player' => $opponent,
+
+        // {"x":5,"y":4,"ship":"Submarine","hit":false,"miss":false,"sunk":false}
+        // Show full ships + hits + misses (because it's your own board, no secrets)
+        $yourBoard = $boardViewService->getBoardForPlayer($game, $user, true);
+
+        // {"x":5,"y":2,"ship":null,"hit":false,"miss":false,"sunk":false}
+        // Show only hits/misses (no enemy ships visible unless hit)
+        $opponentBoard = $boardViewService->getBoardForPlayer($game, $user, false);
+
+        $gameEvents = $gameEventRepository->findBy([
             'game' => $game,
         ]);
-        $opponentShips = $shipRepository->findBy([
-            'board' => $opponentBoard
-        ]);
-
-
-        $opponentBoardInfo = [];
-
-        foreach($opponentBoard->getShots() as $shot) {
-            $position = $shot->getX() . $shot->getY();
-            $opponentBoardInfo[$position] = 'hit';
-        }
-
-        $gameLogs = $gameLogRepository->findBy([
-            'game' => $game,
-        ]);
-
 
         return $this->render('/game/play.html.twig', [
             'game' => $game,
             'opponent' => $opponent,
-            'opponentBoardInfo' => $opponentBoardInfo,
-            'yourBoardInfo' => $yourBoardInfo,
-            'gameLogs' => $gameLogs
+            'yourBoard' => $yourBoard,
+            'opponentBoard' => $opponentBoard,
+            'gameLogs' => $gameEvents
         ]);
     }
 
@@ -214,17 +144,11 @@ final class GameController extends AbstractController
     public function surrender(
         #[CurrentUser] User $user,
         Game $game,
-        EntityManagerInterface $entityManager
+        GameService $gameService,
     ): Response
     {
         $playerOpponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
-
-        $game->setWinner($playerOpponent);
-        $game->setStatus(GameStatus::GAME_FINISHED);
-        $game->setFinishedAt(new \DateTimeImmutable());
-
-        $entityManager->persist($game);
-        $entityManager->flush();
+        $gameService->finishGame($game, $playerOpponent);
 
         return $this->redirectToRoute('app_game_lobby', [
             'id' => $game->getId(),

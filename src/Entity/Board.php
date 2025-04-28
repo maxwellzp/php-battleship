@@ -169,7 +169,7 @@ class Board
     {
         foreach ($this->ships as $ship) {
             foreach ($ship->getCoordinates() as $coord) {
-                if ($coord['x'] === $x && $coord['y'] === $y) {
+                if ($coord->x === $x && $coord->y === $y) {
                     return true;
                 }
             }
@@ -190,5 +190,29 @@ class Board
             }
         }
         return true;
+    }
+
+    public function findShipAtPosition(int $x, int $y): ?Ship
+    {
+        foreach ($this->getShips() as $ship) {
+            foreach ($ship->getCoordinates() as $position) {
+                if ($position->x === $x && $position->y === $y) {
+                    return $ship;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function findShotAt(int $x, int $y): ?Shot
+    {
+        foreach ($this->getShots() as $shot) {
+            if ($shot->getX() === $x && $shot->getY() === $y) {
+                return $shot;
+            }
+        }
+
+        return null;
     }
 }

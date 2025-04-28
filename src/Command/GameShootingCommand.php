@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Entity\User;
-use App\Enum\GameStatus;
 use App\Repository\BoardRepository;
 use App\Repository\GameRepository;
 use App\Repository\UserRepository;
+use App\Service\GameService;
 use App\Service\GameStateEvaluator;
 use App\Service\ShotProcessor;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -30,7 +29,8 @@ class GameShootingCommand extends Command
         private UserRepository     $userRepository,
         private BoardRepository    $boardRepository,
         private GameRepository     $gameRepository,
-        private GameStateEvaluator $gameStateEvaluator
+        private GameStateEvaluator $gameStateEvaluator,
+        private GameService        $gameService
     )
     {
         parent::__construct();
@@ -63,14 +63,8 @@ class GameShootingCommand extends Command
             $io->error($exception->getMessage());
         }
 
-        if ($this->gameStateEvaluator->isGameOver($game)) {
-            $winner = $this->gameStateEvaluator->getWinner($game);
-            if ($winner instanceof User) {
-                $game->setWinner($winner);
-                $game->setStatus(GameStatus::GAME_FINISHED);
-                $game->setFinishedAt(new \DateTimeImmutable());
-                $this->gameRepository->save($game);
-            }
+        if ($this->gameStateEvaluator->isGameOver($game) && $winner = $this->gameStateEvaluator->getWinner($game)) {
+            $this->gameService->finishGame($game, $winner);
         }
 
         return Command::SUCCESS;

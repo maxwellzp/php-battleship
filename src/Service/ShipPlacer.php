@@ -62,8 +62,8 @@ class ShipPlacer
     {
         foreach ($coordinates as $coordinate) {
 
-            $x = $coordinate['x'];
-            $y = $coordinate['y'];
+            $x = $coordinate->x;
+            $y = $coordinate->y;
 
             if ($x < 0 || $x > 9 || $y < 0 || $y > 9) {
                 throw new InvalidPlacementException(sprintf('Coordinate (%d, %d) is out of bounds.', $x, $y));
