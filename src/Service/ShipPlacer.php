@@ -35,6 +35,7 @@ class ShipPlacer
      * @param Board $board
      * @param ShipDTO[] $ships
      * @return void
+     * @throws InvalidPlacementException
      */
     public function placeShips(Board $board, array $ships): void
     {
