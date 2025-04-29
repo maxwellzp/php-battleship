@@ -10,7 +10,10 @@ class CoordinateConverter
 
     public function toHumanReadable(int $x, int $y): string
     {
-        $letter = self::LETTERS[$x] ?? '?';
+        if ($x < 0 || $x > 10) {
+            throw new \Exception('X must be between 0 and 9');
+        }
+        $letter = self::LETTERS[$x];
         $number = $y + 1;
         return $letter . $number;
     }
