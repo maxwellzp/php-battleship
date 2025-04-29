@@ -34,8 +34,7 @@ final class GameController extends AbstractController
         #[CurrentUser] User $user,
         GameService $gameService,
         MercureService $mercureService
-    ): Response
-    {
+    ): Response {
         $game = $gameService->createNewGame($user);
         $mercureService->publishNewGame($game, $this->generateUrl('app_game_join', ['id' => $game->getId()]));
 
@@ -60,13 +59,15 @@ final class GameController extends AbstractController
         Game $game,
         GameService $gameService,
         MercureService $mercureService
-    ): Response
-    {
+    ): Response {
         if ($game->getPlayer2() || $game->getPlayer1() === $user) {
             return $this->redirectToRoute('app_game_index');
         }
         $game = $gameService->joinGame($game, $user);
-        $mercureService->publishJoinedGame($game, $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()]));
+        $mercureService->publishJoinedGame(
+            $game,
+            $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()])
+        );
 
         return $this->redirectToRoute('app_game_lobby', [
             'id' => $game->getId(),
@@ -78,8 +79,7 @@ final class GameController extends AbstractController
     public function shipPlacement(
         #[CurrentUser] User $user,
         Game $game,
-    ): Response
-    {
+    ): Response {
         return $this->render('/game/ship_placement.html.twig', [
             'game' => $game,
         ]);
@@ -92,8 +92,7 @@ final class GameController extends AbstractController
         Game $game,
         GameEventRepository $gameEventRepository,
         BoardViewService $boardViewService
-    ): Response
-    {
+    ): Response {
         $opponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
 
         // {"x":5,"y":4,"ship":"Submarine","hit":false,"miss":false,"sunk":false}
@@ -120,8 +119,8 @@ final class GameController extends AbstractController
     public function markPlayerAsReady(
         #[CurrentUser] User $user,
         GameRepository $gameRepository,
-        Game $game): Response
-    {
+        Game $game
+    ): Response {
         $game->addPlayerReady($user->getId());
         $gameRepository->save($game, true);
 
@@ -131,8 +130,8 @@ final class GameController extends AbstractController
     public function unMarkPlayerAsReady(
         #[CurrentUser] User $user,
         GameRepository $gameRepository,
-        Game $game): Response
-    {
+        Game $game
+    ): Response {
         $game->removePlayerReady($user->getId());
         $gameRepository->save($game, true);
 
@@ -145,8 +144,7 @@ final class GameController extends AbstractController
         #[CurrentUser] User $user,
         Game $game,
         GameService $gameService,
-    ): Response
-    {
+    ): Response {
         $playerOpponent = $game->getPlayer1() === $user ? $game->getPlayer2() : $game->getPlayer1();
         $gameService->finishGame($game, $playerOpponent);
 

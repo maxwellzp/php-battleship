@@ -16,8 +16,7 @@ class ShipFactory
         ShipType $type,
         ShipOrientation $shipOrientation,
         array $coordinates
-    ): Ship
-    {
+    ): Ship {
         $ship = new Ship($type);
         $ship->setBoard($board);
         $ship->setCoordinates($coordinates);

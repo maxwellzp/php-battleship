@@ -24,9 +24,8 @@ class GameBoardsCommand extends Command
     public function __construct(
         private BoardViewService $boardViewService,
         private UserRepository $userRepository,
-        private GameRepository     $gameRepository,
-    )
-    {
+        private GameRepository $gameRepository,
+    ) {
         parent::__construct();
     }
 

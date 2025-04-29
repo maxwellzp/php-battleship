@@ -11,8 +11,7 @@ class ShipStatusService
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager
-    )
-    {
+    ) {
     }
 
     public function updateShipSunkStatus(Ship $ship): void

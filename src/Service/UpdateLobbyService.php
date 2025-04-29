@@ -12,11 +12,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class UpdateLobbyService
 {
     public function __construct(
-        private MercureService         $mercureService,
-        private UrlGeneratorInterface  $urlGenerator,
+        private MercureService $mercureService,
+        private UrlGeneratorInterface $urlGenerator,
         private EntityManagerInterface $entityManager,
-    )
-    {
+    ) {
     }
 
     public function updateLobby(Game $game): void
@@ -75,7 +74,10 @@ class UpdateLobbyService
             $statusMsg = ' Player 2 has finished placing ships ';
         }
         $this->mercureService->publishSecondPlayerPlacedShips(
-            $game, $player, $statusMsg,
-            $this->urlGenerator->generate('app_game_play', ['id' => $game->getId()]));
+            $game,
+            $player,
+            $statusMsg,
+            $this->urlGenerator->generate('app_game_play', ['id' => $game->getId()])
+        );
     }
 }

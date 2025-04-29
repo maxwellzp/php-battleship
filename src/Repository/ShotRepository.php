@@ -23,5 +23,4 @@ class ShotRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
 }

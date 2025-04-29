@@ -15,8 +15,7 @@ class BoardViewService
     public function __construct(
         private BoardRepository $boardRepository,
         private LoggerInterface $logger
-    )
-    {
+    ) {
     }
 
     public function getBoardForPlayer(Game $game, User $player, bool $viewOwnBoard): array
@@ -81,5 +80,4 @@ class BoardViewService
 
         return $board;
     }
-
 }

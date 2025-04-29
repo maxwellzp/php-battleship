@@ -23,5 +23,4 @@ class ShipRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
 }

@@ -24,12 +24,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class GameShowPlayerBoardCommand extends Command
 {
     public function __construct(
-        private readonly UserRepository  $userRepository,
-        private readonly GameRepository  $gameRepository,
+        private readonly UserRepository $userRepository,
+        private readonly GameRepository $gameRepository,
         private readonly BoardRepository $boardRepository,
-        private readonly ShipRepository  $shipRepository,
-    )
-    {
+        private readonly ShipRepository $shipRepository,
+    ) {
         parent::__construct();
     }
 

@@ -15,9 +15,7 @@ class ShipPlacer
     public function __construct(
         private readonly ShipFactory $shipFactory,
         private readonly EntityManagerInterface $entityManager,
-    )
-    {
-
+    ) {
     }
 
     /**
@@ -41,7 +39,8 @@ class ShipPlacer
     public function placeShips(Board $board, array $ships): void
     {
         foreach ($ships as $ship) {
-            $ship = $this->shipFactory->create($board, $ship->name, $ship->orientation, $ship->coords);;
+            $ship = $this->shipFactory->create($board, $ship->name, $ship->orientation, $ship->coords);
+            ;
 
             $this->validatePlacement($board, $ship->getCoordinates());
 
@@ -61,7 +60,6 @@ class ShipPlacer
     public function validatePlacement(Board $board, array $coordinates): void
     {
         foreach ($coordinates as $coordinate) {
-
             $x = $coordinate['x'];
             $y = $coordinate['y'];
 

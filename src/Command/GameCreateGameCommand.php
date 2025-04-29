@@ -25,8 +25,7 @@ class GameCreateGameCommand extends Command
         private GameService $gameService,
         private MercureService $mercureService,
         private UserRepository $userRepository,
-    )
-    {
+    ) {
         parent::__construct();
     }
 

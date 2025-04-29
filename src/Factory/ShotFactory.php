@@ -17,8 +17,7 @@ class ShotFactory
         int $x,
         int $y,
         ShotResult $shotResult
-    ): Shot
-    {
+    ): Shot {
         $shot = new Shot();
         $shot->setBoard($board);
         $shot->setPlayer($user);

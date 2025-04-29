@@ -51,17 +51,16 @@ final class ApiGameController extends AbstractController
     #[Route('api/game/{id}/ship-placement', name: 'app_game_ship_placement_save', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function shipPlacementSave(
-        #[CurrentUser] User                              $user,
-        Game                                             $game,
-        BoardFactory                                     $boardFactory,
+        #[CurrentUser] User $user,
+        Game $game,
+        BoardFactory $boardFactory,
         #[MapRequestPayload(type: ShipDTO::class)] array $ships,
-        LoggerInterface                                  $logger,
-        ShipPlacer                                       $shipPlacer,
-        BoardRepository                                  $boardRepository,
-        GameRepository                                   $gameRepository,
-        UpdateLobbyService                               $updateLobbyService,
-    ): JsonResponse
-    {
+        LoggerInterface $logger,
+        ShipPlacer $shipPlacer,
+        BoardRepository $boardRepository,
+        GameRepository $gameRepository,
+        UpdateLobbyService $updateLobbyService,
+    ): JsonResponse {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
             throw $this->createAccessDeniedException();
         }
@@ -110,19 +109,17 @@ final class ApiGameController extends AbstractController
      */
     #[Route('/api/game/{id}/fire', name: 'api_game_fire', methods: ['POST'])]
     public function fire(
-        Game                               $game,
-        #[CurrentUser] User                $user,
-        EntityManagerInterface             $em,
+        Game $game,
+        #[CurrentUser] User $user,
+        EntityManagerInterface $em,
         #[MapRequestPayload] CoordinateDTO $shotCoordinates,
-        BoardRepository                    $boardRepository,
-        ShotProcessor                      $shotProcessor,
-        GameStateEvaluator                 $gameStateEvaluator,
-        GameService                        $gameService,
-        LoggerInterface                    $logger,
+        BoardRepository $boardRepository,
+        ShotProcessor $shotProcessor,
+        GameStateEvaluator $gameStateEvaluator,
+        GameService $gameService,
+        LoggerInterface $logger,
         ShipStatusService $shipStatusService
-
-    ): JsonResponse
-    {
+    ): JsonResponse {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
             throw $this->createAccessDeniedException();
         }

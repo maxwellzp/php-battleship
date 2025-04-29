@@ -14,8 +14,7 @@ enum ShipType: string
 
     public function getSize(): int
     {
-        return match($this)
-        {
+        return match ($this) {
             ShipType::CARRIER => 5,
             ShipType::BATTLESHIP => 4,
             ShipType::CRUISER, ShipType::SUBMARINE => 3,

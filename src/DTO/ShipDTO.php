@@ -16,11 +16,9 @@ class ShipDTO
      * @param array $coords
      */
     public function __construct(
-        public ShipType        $name,
+        public ShipType $name,
         public ShipOrientation $orientation,
-        public array           $coords,
-    )
-    {
+        public array $coords,
+    ) {
     }
-
 }

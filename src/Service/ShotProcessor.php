@@ -19,13 +19,12 @@ use App\Repository\ShotRepository;
 class ShotProcessor
 {
     public function __construct(
-        private readonly ShotFactory         $shotFactory,
-        private readonly ShotRepository      $shotRepository,
-        private readonly GameEventLogger     $gameEventLogger,
+        private readonly ShotFactory $shotFactory,
+        private readonly ShotRepository $shotRepository,
+        private readonly GameEventLogger $gameEventLogger,
         private readonly CoordinateConverter $coordinateConverter,
-        private readonly ShipRepository      $shipRepository,
-    )
-    {
+        private readonly ShipRepository $shipRepository,
+    ) {
     }
 
     public function processShot(Board $board, User $user, int $x, int $y): Shot
@@ -99,10 +98,12 @@ class ShotProcessor
     {
         $this->gameEventLogger->log(
             $game,
-            sprintf("Player: %s attacked %s: %s",
+            sprintf(
+                "Player: %s attacked %s: %s",
                 $user->getUsername(),
                 $this->coordinateConverter->toHumanReadable($x, $y),
                 $shot->getResult()->value
-            ));
+            )
+        );
     }
 }

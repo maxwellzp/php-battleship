@@ -25,14 +25,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class GameShootingCommand extends Command
 {
     public function __construct(
-        private ShotProcessor      $shotProcessor,
-        private UserRepository     $userRepository,
-        private BoardRepository    $boardRepository,
-        private GameRepository     $gameRepository,
+        private ShotProcessor $shotProcessor,
+        private UserRepository $userRepository,
+        private BoardRepository $boardRepository,
+        private GameRepository $gameRepository,
         private GameStateEvaluator $gameStateEvaluator,
-        private GameService        $gameService
-    )
-    {
+        private GameService $gameService
+    ) {
         parent::__construct();
     }
 

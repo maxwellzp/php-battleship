@@ -39,8 +39,7 @@ class GamePlacingShipsCommand extends Command
         private ShipPlacer $shipPlacer,
         private LoggerInterface $logger,
         private UpdateLobbyService $updateLobbyService,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -188,7 +187,11 @@ class GamePlacingShipsCommand extends Command
         /** @var ShipDTO[] $ships */
         $shipsDto = [];
         foreach ($payload as $ship) {
-            $shipDto = new ShipDTO(ShipType::from($ship['name']), ShipOrientation::from($ship['orientation']), $ship['coords']);
+            $shipDto = new ShipDTO(
+                ShipType::from($ship['name']),
+                ShipOrientation::from($ship['orientation']),
+                $ship['coords']
+            );
             $shipsDto[] = $shipDto;
         }
 
@@ -209,7 +212,7 @@ class GamePlacingShipsCommand extends Command
         //Mercure update
         try {
             $this->updateLobbyService->updateLobby($game);
-        }catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
 

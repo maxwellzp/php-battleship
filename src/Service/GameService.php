@@ -14,12 +14,10 @@ use App\Repository\UserRepository;
 class GameService
 {
     public function __construct(
-        private readonly GameFactory    $gameFactory,
+        private readonly GameFactory $gameFactory,
         private readonly GameRepository $gameRepository,
         private readonly UserRepository $userRepository,
-    )
-    {
-
+    ) {
     }
 
     public function createNewGame(User $user): Game

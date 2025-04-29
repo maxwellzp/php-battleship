@@ -27,8 +27,7 @@ class RemoveGamesCommand extends Command
         private EntityManagerInterface $entityManager,
         private BoardRepository $boardRepository,
         private ShipRepository $shipRepository,
-    )
-    {
+    ) {
         parent::__construct();
     }
 

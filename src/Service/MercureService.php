@@ -13,7 +13,6 @@ class MercureService
 {
     public function __construct(private readonly HubInterface $hub)
     {
-
     }
 
     public function publishNewGame(Game $game, string $joinPath): void
@@ -71,11 +70,11 @@ class MercureService
     }
 
     public function publishSecondPlayerPlacedShips(
-        Game   $game,
-        int    $player,
+        Game $game,
+        int $player,
         string $statusMsg,
-        string $gameStartUrl): void
-    {
+        string $gameStartUrl
+    ): void {
         $update = new Update(
             'http://example.com/update-lobby/' . $game->getId(),
             json_encode([
@@ -88,5 +87,4 @@ class MercureService
 
         $this->hub->publish($update);
     }
-
 }
