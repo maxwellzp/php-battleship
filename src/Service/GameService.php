@@ -51,6 +51,9 @@ class GameService
         $winner->setWins($winner->getWins() + 1);
         $this->userRepository->save($winner);
 
+        $opponent = $game->getPlayer1() === $winner ? $game->getPlayer2() : $game->getPlayer1();
+        $opponent->setLosses($opponent->getLosses() + 1);
+        $this->userRepository->save($opponent);
         return $game;
     }
 }

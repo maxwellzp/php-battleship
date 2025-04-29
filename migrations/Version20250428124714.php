@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250427113126 extends AbstractMigration
+final class Version20250428124714 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -87,7 +87,7 @@ final class Version20250427113126 extends AbstractMigration
             COMMENT ON COLUMN game_event.created_at IS '(DC2Type:datetime_immutable)'
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE ship (id UUID NOT NULL, board_id UUID NOT NULL, type VARCHAR(255) NOT NULL, size INT NOT NULL, orientation VARCHAR(255) NOT NULL, coordinates TEXT NOT NULL, is_sunk BOOLEAN NOT NULL, PRIMARY KEY(id))
+            CREATE TABLE ship (id UUID NOT NULL, board_id UUID NOT NULL, type VARCHAR(255) NOT NULL, size INT NOT NULL, orientation VARCHAR(255) NOT NULL, coordinates JSON NOT NULL, is_sunk BOOLEAN NOT NULL, PRIMARY KEY(id))
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_FA30EB24E7EC5785 ON ship (board_id)
@@ -97,9 +97,6 @@ final class Version20250427113126 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN ship.board_id IS '(DC2Type:uuid)'
-        SQL);
-        $this->addSql(<<<'SQL'
-            COMMENT ON COLUMN ship.coordinates IS '(DC2Type:array)'
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE shot (id UUID NOT NULL, board_id UUID NOT NULL, player_id UUID NOT NULL, x INT NOT NULL, y INT NOT NULL, fired_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, result VARCHAR(255) NOT NULL, PRIMARY KEY(id))

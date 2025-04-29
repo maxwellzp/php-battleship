@@ -169,7 +169,7 @@ class Board
     {
         foreach ($this->ships as $ship) {
             foreach ($ship->getCoordinates() as $coord) {
-                if ($coord->x === $x && $coord->y === $y) {
+                if ($coord['x'] === $x && $coord['y'] === $y) {
                     return true;
                 }
             }
@@ -196,7 +196,7 @@ class Board
     {
         foreach ($this->getShips() as $ship) {
             foreach ($ship->getCoordinates() as $position) {
-                if ($position->x === $x && $position->y === $y) {
+                if ($position['x'] === $x && $position['y'] === $y) {
                     return $ship;
                 }
             }

@@ -26,7 +26,11 @@
                             <div
                                     {{ stimulus_action('game', 'fire', 'click') }}
                                     class="border text-center
-{% if cell.hit %} bg-danger text-white {% elseif cell.miss %} bg-light {% else %} bg-white {% endif %}
+                        {% if cell.sunk %} bg-dark text-warning
+                        {% elseif cell.hit %} bg-danger text-white
+                        {% elseif cell.miss %} bg-secondary text-white
+                        {% else %} bg-white hover:bg-light
+                        {% endif %}
 "
                                     data-game-x-value="{{ cell.x }}"
                                     data-game-y-value="{{ cell.y }}"
@@ -53,7 +57,8 @@
                     {% for cell in row %}
 
                         <div class="border text-center
-                        {% if cell.hit and cell.ship %} bg-danger text-white
+                        {% if cell.sunk %} bg-dark text-warning
+                        {% elseif cell.hit and cell.ship %} bg-danger text-white
                         {% elseif cell.hit %} bg-secondary text-white
                         {% elseif cell.ship %} bg-primary text-white
                         {% else %} bg-light
@@ -63,7 +68,7 @@
                         >
                             {% if cell.hit and cell.ship %}
                                 X
-                            {% elseif cell.miss %}
+                            {% elseif cell.hit %}
                                 O
                             {% else %}
                                 &nbsp;

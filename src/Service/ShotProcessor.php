@@ -42,10 +42,6 @@ class ShotProcessor
         if ($ship) {
             $shot->setResult(ShotResult::HIT);
             $this->markShipHit($ship, $x, $y);
-
-            if ($this->isShipSunk($ship)) {
-                $shot->setResult(ShotResult::SUNK);
-            }
         }
 
         $this->shotRepository->save($shot, true);
@@ -68,7 +64,7 @@ class ShotProcessor
     {
         foreach ($board->getShips() as $ship) {
             foreach ($ship->getCoordinates() as $position) {
-                if ($position->x === $x && $position->y === $y) {
+                if ($position['x'] === $x && $position['y'] === $y) {
                     return $ship;
                 }
             }
@@ -81,7 +77,7 @@ class ShotProcessor
     {
         $positions = $ship->getCoordinates();
         foreach ($positions as &$position) {
-            if ($position->x === $x && $position->y === $y) {
+            if ($position['x'] === $x && $position['y'] === $y) {
                 $position['hit'] = true;
             }
         }

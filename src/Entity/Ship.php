@@ -6,7 +6,9 @@ namespace App\Entity;
 
 use App\Enum\ShipOrientation;
 use App\Enum\ShipType;
+use App\Enum\ShotResult;
 use App\Repository\ShipRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -34,7 +36,7 @@ class Ship
     #[ORM\JoinColumn(nullable: false)]
     private ?Board $board = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
+    #[ORM\Column(type: 'json')]
     private array $coordinates = [];
 
     #[ORM\Column]
@@ -122,5 +124,30 @@ class Ship
         $this->isSunk = $isSunk;
 
         return $this;
+    }
+
+
+    public function isSunkByShots(Collection $shots): bool
+    {
+        foreach ($this->coordinates as $coord) {
+            $hitAtThisCoord = false;
+
+            foreach ($shots as $shot) {
+                if (
+                    $shot->getX() === $coord['x'] &&
+                    $shot->getY() === $coord['y'] &&
+                    $shot->getResult() === ShotResult::HIT
+                ) {
+                    $hitAtThisCoord = true;
+                    break;
+                }
+            }
+
+            if (!$hitAtThisCoord) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

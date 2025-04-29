@@ -56,7 +56,7 @@ class GamePlacingShipsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $game = $this->gameRepository->find('0196770e-078f-7f33-bf9f-a02e41992a1f');
+        $game = $this->gameRepository->find('01967c73-9595-7949-8ab8-cc1e4fc8fa33');
         $player = $this->userRepository->findOneBy(['email' => 'player1@example.com']);
 
         $board = $this->boardRepository->findOneBy(['game' => $game, 'player' => $player]);

@@ -8,6 +8,7 @@ use App\DTO\CoordinateDTO;
 use App\DTO\ShipDTO;
 use App\Entity\Board;
 use App\Entity\Game;
+use App\Entity\Ship;
 use App\Entity\User;
 use App\Exception\InvalidPlacementException;
 use App\Factory\BoardFactory;
@@ -17,6 +18,7 @@ use App\Repository\UserRepository;
 use App\Service\GameService;
 use App\Service\GameStateEvaluator;
 use App\Service\ShipPlacer;
+use App\Service\ShipStatusService;
 use App\Service\ShotProcessor;
 use App\Service\UpdateLobbyService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -102,8 +104,6 @@ final class ApiGameController extends AbstractController
      * @param BoardRepository $boardRepository
      * @param ShotProcessor $shotProcessor
      * @param GameStateEvaluator $gameStateEvaluator
-     * @param UserRepository $userRepository
-     * @param GameRepository $gameRepository
      * @param GameService $gameService
      * @param LoggerInterface $logger
      * @return JsonResponse
@@ -117,10 +117,9 @@ final class ApiGameController extends AbstractController
         BoardRepository                    $boardRepository,
         ShotProcessor                      $shotProcessor,
         GameStateEvaluator                 $gameStateEvaluator,
-        UserRepository                     $userRepository,
-        GameRepository                     $gameRepository,
         GameService                        $gameService,
         LoggerInterface                    $logger,
+        ShipStatusService $shipStatusService
 
     ): JsonResponse
     {
@@ -142,10 +141,23 @@ final class ApiGameController extends AbstractController
             $shot = $shotProcessor->processShot($opponentBoard, $user, $shotCoordinates->x, $shotCoordinates->y);
         } catch (\Exception $exception) {
             $logger->error($exception->getMessage());
+            $logger->error($exception->getTraceAsString());
+            return new JsonResponse([
+                'error' => $exception->getMessage()
+            ]);
+        }
+
+        $ship = $opponentBoard->findShipAtPosition($shotCoordinates->x, $shotCoordinates->y);
+
+        if ($ship instanceof Ship) {
+            $shipStatusService->updateShipSunkStatus($ship);
         }
 
         if ($gameStateEvaluator->isGameOver($game) && $winner = $gameStateEvaluator->getWinner($game)) {
             $gameService->finishGame($game, $winner);
+            return new JsonResponse([
+                'winner' => $winner->getUsername()
+            ]);
         }
 
         $game->setCurrentTurn($opponent);

@@ -13,7 +13,7 @@ class ShipDTO
     /**
      * @param ShipType $name
      * @param ShipOrientation $orientation
-     * @param CoordinateDTO[] $coords
+     * @param array $coords
      */
     public function __construct(
         public ShipType        $name,

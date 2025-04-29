@@ -8,11 +8,13 @@ use App\Entity\Game;
 use App\Entity\User;
 use App\Enum\ShotResult;
 use App\Repository\BoardRepository;
+use Psr\Log\LoggerInterface;
 
 class BoardViewService
 {
     public function __construct(
-        private BoardRepository $boardRepository
+        private BoardRepository $boardRepository,
+        private LoggerInterface $logger
     )
     {
     }
@@ -20,6 +22,19 @@ class BoardViewService
     public function getBoardForPlayer(Game $game, User $player, bool $viewOwnBoard): array
     {
         $board = [];
+
+        $viewerBoard = $this->boardRepository->findOneBy([
+            'game' => $game,
+            'player' => $player,
+        ]);
+        $viewerShots = $viewerBoard->getShots();
+
+        $enemy = $game->getOpponent($player);
+        $enemyBoard = $this->boardRepository->findOneBy([
+            'game' => $game,
+            'player' => $enemy,
+        ]);
+        $enemyShots = $enemyBoard->getShots();
 
         for ($y = 0; $y < 10; $y++) {
             for ($x = 0; $x < 10; $x++) {
@@ -33,40 +48,30 @@ class BoardViewService
                 ];
 
                 if ($viewOwnBoard) {
-                    $yourBoard = $this->boardRepository->findOneBy([
-                        'game' => $game,
-                        'player' => $player,
-                    ]);
-
-                    // If viewing own board
-                    $ship = $yourBoard->findShipAtPosition($x, $y);
-                    $cell['ship'] = $ship ? $ship->getType()->value : null;
-                    $shot = $yourBoard->findShotAt($x, $y);
+                    $ship = $viewerBoard->findShipAtPosition($x, $y);
+                    $shot = $viewerBoard->findShotAt($x, $y);
+                    $shots = $viewerShots;
                 } else {
-                    // If viewing enemy board
-                    $enemy = $game->getOpponent($player);
-                    $enemyBoard = $this->boardRepository->findOneBy([
-                        'game' => $game,
-                        'player' => $enemy,
-                    ]);
-
                     $ship = $enemyBoard->findShipAtPosition($x, $y);
                     $shot = $enemyBoard->findShotAt($x, $y);
+                    $shots = $enemyShots;
+                }
 
-                    if ($ship && $shot) {
-                        $cell['ship'] = $ship->getType()->value;
+                if ($ship) {
+                    $cell['ship'] = $ship ? $ship->getType()->value : null;
+
+                    // Check if the ship is sunk based on shots
+                    if ($ship->isSunkByShots($shots)) {
+                        $cell['sunk'] = true;
                     }
                 }
+
 
                 if ($shot) {
                     if ($shot->getResult() === ShotResult::HIT) {
                         $cell['hit'] = true;
                     } else {
                         $cell['miss'] = true;
-                    }
-
-                    if ($shot->getResult() === ShotResult::SUNK) {
-                        $cell['sunk'] = true;
                     }
                 }
 
