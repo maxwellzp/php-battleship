@@ -13,6 +13,7 @@ use App\Enum\ShotResult;
 use App\Exception\InvalidShotException;
 use App\Factory\ShotFactory;
 use App\Helpers\CoordinateConverter;
+use App\Repository\BoardRepository;
 use App\Repository\ShipRepository;
 use App\Repository\ShotRepository;
 
@@ -24,6 +25,7 @@ class ShotProcessor
         private readonly GameEventLogger $gameEventLogger,
         private readonly CoordinateConverter $coordinateConverter,
         private readonly ShipRepository $shipRepository,
+        private readonly BoardRepository $boardRepository,
     ) {
     }
 
@@ -44,6 +46,8 @@ class ShotProcessor
         }
 
         $this->shotRepository->save($shot, true);
+        $board->addShot($shot);
+        $this->boardRepository->save($board, true);
 
         $this->log($board->getGame(), $user, $x, $y, $shot);
 
