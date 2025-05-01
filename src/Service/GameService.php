@@ -9,14 +9,13 @@ use App\Entity\User;
 use App\Enum\GameStatus;
 use App\Factory\GameFactory;
 use App\Repository\GameRepository;
-use App\Repository\UserRepository;
 
 class GameService
 {
     public function __construct(
         private readonly GameFactory $gameFactory,
         private readonly GameRepository $gameRepository,
-        private readonly UserRepository $userRepository,
+        private readonly UpdatePlayerStats $updatePlayerStats,
     ) {
     }
 
@@ -46,12 +45,7 @@ class GameService
         $game->setFinishedAt(new \DateTimeImmutable());
         $this->gameRepository->save($game);
 
-        $winner->setWins($winner->getWins() + 1);
-        $this->userRepository->save($winner);
-
-        $opponent = $game->getPlayer1() === $winner ? $game->getPlayer2() : $game->getPlayer1();
-        $opponent->setLosses($opponent->getLosses() + 1);
-        $this->userRepository->save($opponent);
+        $this->updatePlayerStats->updateStats($game);
         return $game;
     }
 }
