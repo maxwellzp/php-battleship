@@ -8,14 +8,13 @@ use App\Entity\Game;
 use App\Entity\User;
 use App\Enum\ShotResult;
 use App\Repository\BoardRepository;
-use Psr\Log\LoggerInterface;
 
 class BoardViewService
 {
     public function __construct(
-        private BoardRepository $boardRepository,
-        private LoggerInterface $logger
-    ) {
+        private BoardRepository $boardRepository
+    )
+    {
     }
 
     public function getBoardForPlayer(Game $game, User $player, bool $viewOwnBoard): array
@@ -26,14 +25,17 @@ class BoardViewService
             'game' => $game,
             'player' => $player,
         ]);
-        $viewerShots = $viewerBoard->getShots();
-
-        $enemy = $game->getOpponent($player);
-        $enemyBoard = $this->boardRepository->findOneBy([
+        $opponent = $game->getOpponent($player);
+        $opponentBoard = $this->boardRepository->findOneBy([
             'game' => $game,
-            'player' => $enemy,
+            'player' => $opponent,
         ]);
-        $enemyShots = $enemyBoard->getShots();
+        if (!$viewerBoard || !$opponentBoard) {
+            throw new \RuntimeException('Board not found for one or both players.');
+        }
+
+        $viewerShots = $viewerBoard->getShots();
+        $enemyShots = $opponentBoard->getShots();
 
         for ($y = 0; $y < 10; $y++) {
             for ($x = 0; $x < 10; $x++) {
@@ -51,13 +53,13 @@ class BoardViewService
                     $shot = $viewerBoard->findShotAt($x, $y);
                     $shots = $viewerShots;
                 } else {
-                    $ship = $enemyBoard->findShipAtPosition($x, $y);
-                    $shot = $enemyBoard->findShotAt($x, $y);
+                    $ship = $opponentBoard->findShipAtPosition($x, $y);
+                    $shot = $opponentBoard->findShotAt($x, $y);
                     $shots = $enemyShots;
                 }
 
                 if ($ship) {
-                    $cell['ship'] = $ship ? $ship->getType()->value : null;
+                    $cell['ship'] = $ship->getType()->value;
 
                     // Check if the ship is sunk based on shots
                     if ($ship->isSunkByShots($shots)) {
