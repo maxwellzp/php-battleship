@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Service;
 
+use App\DTO\ShipDTO;
 use App\Entity\Board;
-use App\Entity\Ship;
 use App\Entity\Shot;
 use App\Entity\User;
 use App\Enum\ShipOrientation;
@@ -13,17 +13,12 @@ use App\Enum\ShipType;
 use App\Enum\ShotResult;
 use App\Exception\InvalidShotException;
 use App\Factory\BoardFactory;
-use App\Factory\GameFactory;
-use App\Factory\ShipFactory;
-use App\Factory\ShotFactory;
 use App\Factory\UserFactory;
-use App\Helpers\CoordinateConverter;
 use App\Repository\BoardRepository;
-use App\Repository\GameRepository;
-use App\Repository\ShipRepository;
 use App\Repository\ShotRepository;
 use App\Repository\UserRepository;
-use App\Service\GameEventLogger;
+use App\Service\GameService;
+use App\Service\ShipPlacer;
 use App\Service\ShotProcessor;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -36,26 +31,23 @@ class ShotProcessorTest extends KernelTestCase
     use ResetDatabase;
     use Factories;
 
-    private Ship $ship;
-    private ShotFactory $shotFactory;
     private Board $boardPlayer1;
     private User $player2;
     private BoardRepository $boardRepository;
     private ShotRepository $shotRepository;
-    private GameEventLogger $gameEventLogger;
-    private CoordinateConverter $coordinateConverter;
-    private ShipRepository $shipRepository;
+    private ShotProcessor $shotProcessor;
+    private GameService $gameService;
     protected function setUp(): void
     {
         parent::setUp();
         self::bootKernel();
 
         $container = static::getContainer();
+        $this->shotProcessor = $container->get(ShotProcessor::class);
+        $this->gameService = $container->get(GameService::class);
+        $shipPlacer = $container->get(ShipPlacer::class);
+
         $this->shotRepository = $container->get(ShotRepository::class);
-        $this->gameEventLogger = $container->get(GameEventLogger::class);
-        $this->coordinateConverter = $container->get(CoordinateConverter::class);
-        $this->shipRepository = $container->get(ShipRepository::class);
-        $this->shotFactory = $container->get(ShotFactory::class);
 
         $userFactory = $container->get(UserFactory::class);
         $userRepository = $container->get(UserRepository::class);
@@ -65,50 +57,35 @@ class ShotProcessorTest extends KernelTestCase
         $userRepository->save($this->player2, true);
 
 
-        $gameFactory = $container->get(GameFactory::class);
-        $gameRepository = $container->get(GameRepository::class);
-        $game = $gameFactory->create($this->player1);
-        $gameRepository->save($game, true);
+        $gameService = $container->get(GameService::class);
+        $game = $gameService->createNewGame($this->player1);
+        $this->game = $gameService->joinGame($game, $this->player2);
 
-        $boardFactory = self::getContainer()->get(BoardFactory::class);
+        $boardFactory = $this->getContainer()->get(BoardFactory::class);
         $this->boardRepository = $container->get(BoardRepository::class);
-        $this->boardPlayer1 = $boardFactory->create($game, $this->player1);
-        $boardPlayer2 = $boardFactory->create($game, $this->player2);
+        $this->boardPlayer1 = $boardFactory->create($this->game, $this->player1);
+        $this->boardPlayer2 = $boardFactory->create($this->game, $this->player2);
         $this->boardRepository->save($this->boardPlayer1, true);
-        $this->boardRepository->save($boardPlayer2, true);
+        $this->boardRepository->save($this->boardPlayer2, true);
 
-        $shipFactory = self::getContainer()->get(ShipFactory::class);
-        $shipRepository = $container->get(ShipRepository::class);
         $coordinates = [
             ["x" => 0, "y" => 0],
             ["x" => 0, "y" => 1],
             ["x" => 0, "y" => 2]
         ];
 
-        $this->ship = $shipFactory->create(
-            $this->boardPlayer1,
-            ShipType::SUBMARINE,
-            ShipOrientation::VERTICAL,
-            $coordinates
-        );
-        $shipRepository->save($this->ship, true);
-        $this->boardPlayer1->addShip($this->ship);
-        $this->boardRepository->save($this->boardPlayer1, true);
+        $ships = [
+            new ShipDTO(ShipType::SUBMARINE, ShipOrientation::VERTICAL, $coordinates)
+        ];
+        $shipPlacer->placeShips($this->boardPlayer1, $ships);
+        $shipPlacer->placeShips($this->boardPlayer2, $ships);
     }
 
     public function testProcessShotWithCorrectDataInsertShotIntoDatabase()
     {
-        $shotProcessor = new ShotProcessor(
-            $this->shotFactory,
-            $this->shotRepository,
-            $this->gameEventLogger,
-            $this->coordinateConverter,
-            $this->shipRepository,
-            $this->boardRepository
-        );
         $x = 0;
         $y = 0;
-        $shot = $shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+        $shot = $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
         self::assertInstanceOf(Shot::class, $shot);
 
         $shotDb = $this->shotRepository->find($shot->getId());
@@ -123,55 +100,47 @@ class ShotProcessorTest extends KernelTestCase
 
     public function testProcessShotWithShipCoordinatesMarkItAsHit()
     {
-        $shotProcessor = new ShotProcessor(
-            $this->shotFactory,
-            $this->shotRepository,
-            $this->gameEventLogger,
-            $this->coordinateConverter,
-            $this->shipRepository,
-            $this->boardRepository
-        );
         $x = 0;
         $y = 0;
-        $shot = $shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+        $shot = $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
 
         $this->assertSame(ShotResult::HIT, $shot->getResult());
     }
 
     public function testProcessShotWithWaterCoordinatesMarkItAsMiss()
     {
-        $shotProcessor = new ShotProcessor(
-            $this->shotFactory,
-            $this->shotRepository,
-            $this->gameEventLogger,
-            $this->coordinateConverter,
-            $this->shipRepository,
-            $this->boardRepository
-        );
         $x = 9;
         $y = 9;
-        $shot = $shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+        $shot = $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
 
         $this->assertSame(ShotResult::MISS, $shot->getResult());
     }
 
     public function testProcessShotWithSameCoordinatesThrowsException()
     {
-        $shotProcessor = new ShotProcessor(
-            $this->shotFactory,
-            $this->shotRepository,
-            $this->gameEventLogger,
-            $this->coordinateConverter,
-            $this->shipRepository,
-            $this->boardRepository
-        );
         $x = 0;
         $y = 0;
-        $shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+        $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
 
         $this->expectException(InvalidShotException::class);
         $this->expectExceptionMessage('This position has already been targeted.');
 
-        $shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+        $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
     }
+
+    public function testShipCoordinateIsMarkedAsHitAfterShot()
+    {
+        $x = 0;
+        $y = 0;
+        $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, $x, $y);
+
+        $ship = $this->boardPlayer1->getShips()->first(); // Assuming 1 ship
+        $coordinates = $ship->getCoordinates();
+
+        $hitPosition = array_filter($coordinates, fn($pos) => $pos['x'] === $x && $pos['y'] === $y);
+
+        $this->assertNotEmpty($hitPosition);
+        $this->assertTrue(reset($hitPosition)['hit']);
+    }
+
 }
