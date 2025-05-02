@@ -9,12 +9,15 @@ use App\Entity\Ship;
 use App\Enum\ShipOrientation;
 use App\Enum\ShipType;
 use App\Exception\InvalidPlacementException;
+use App\Service\ShipPlacer;
 use App\Tests\Helper\GameTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
+#[CoversClass(ShipPlacer::class)]
 class ShipPlacerTest extends KernelTestCase
 {
     use GameTestTrait;
