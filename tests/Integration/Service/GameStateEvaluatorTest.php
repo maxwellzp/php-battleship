@@ -23,6 +23,7 @@ class GameStateEvaluatorTest extends KernelTestCase
     use GameTestTrait;
     use ResetDatabase;
     use Factories;
+
     private ShotProcessor $shotProcessor;
 
     protected function setUp(): void

@@ -9,7 +9,6 @@ use App\Factory\UserFactory;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-
 trait UserTestTrait
 {
     protected User $player1;

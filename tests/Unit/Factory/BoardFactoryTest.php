@@ -31,5 +31,4 @@ class BoardFactoryTest extends TestCase
         $this->assertCount(0, $board->getShips());
         $this->assertCount(0, $board->getShots());
     }
-
 }

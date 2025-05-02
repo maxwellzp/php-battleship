@@ -17,6 +17,7 @@ class UpdatePlayerStatsTest extends KernelTestCase
     use GameTestTrait;
     use ResetDatabase;
     use Factories;
+
     private UpdatePlayerStats $updatePlayerStats;
 
     protected function setUp(): void

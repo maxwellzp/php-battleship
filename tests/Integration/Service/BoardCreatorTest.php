@@ -18,6 +18,7 @@ class BoardCreatorTest extends KernelTestCase
     use NewGameTestTrait;
     use ResetDatabase;
     use Factories;
+
     private BoardCreator $boardCreator;
 
     protected function setUp(): void

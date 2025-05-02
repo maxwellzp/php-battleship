@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CoordinateConverter::class)]
 class CoordinateConverterTest extends TestCase
 {
-
     public function testToHumanReadableWithCorrectArgumentsReturnsCorrectPosition()
     {
         $x = 0;

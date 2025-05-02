@@ -65,12 +65,11 @@ class MercureService
     }
 
     public function publishSecondPlayerPlacedShips(
-        Game   $game,
-        int    $player,
+        Game $game,
+        int $player,
         string $statusMsg,
         string $gameStartUrl
-    ): void
-    {
+    ): void {
         $this->publishLobbyUpdate($game, [
             'status' => $game->getStatus()->value,
             'player' => $player,

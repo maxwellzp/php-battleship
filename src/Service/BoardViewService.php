@@ -13,8 +13,7 @@ class BoardViewService
 {
     public function __construct(
         private BoardRepository $boardRepository
-    )
-    {
+    ) {
     }
 
     public function getBoardForPlayer(Game $game, User $player, bool $viewOwnBoard): array

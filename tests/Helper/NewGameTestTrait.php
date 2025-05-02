@@ -10,6 +10,7 @@ use App\Service\GameService;
 trait NewGameTestTrait
 {
     use UserTestTrait;
+
     protected Game $game;
     protected GameService $gameService;
 

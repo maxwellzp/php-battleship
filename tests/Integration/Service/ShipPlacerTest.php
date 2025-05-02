@@ -69,7 +69,7 @@ class ShipPlacerTest extends KernelTestCase
             ])
         ];
 
-        $exceptionMsg= sprintf('Ship overlaps at position (%d, %d).', $x, $y);
+        $exceptionMsg = sprintf('Ship overlaps at position (%d, %d).', $x, $y);
         $this->expectException(InvalidPlacementException::class);
         $this->expectExceptionMessage($exceptionMsg);
 
@@ -103,8 +103,10 @@ class ShipPlacerTest extends KernelTestCase
 
 
     #[DataProvider('invalidCoordinatesProvider')]
-    public function testValidatePlacementThrowsExceptionForInvalidCoordinates(array $coords, string $expectedMessage): void
-    {
+    public function testValidatePlacementThrowsExceptionForInvalidCoordinates(
+        array $coords,
+        string $expectedMessage
+    ): void {
         $this->expectException(InvalidPlacementException::class);
         $this->expectExceptionMessage($expectedMessage);
 
@@ -140,7 +142,4 @@ class ShipPlacerTest extends KernelTestCase
 
         $this->shipPlacer->placeShips($this->boardPlayer1, $shipsDTO);
     }
-
-
 }
-

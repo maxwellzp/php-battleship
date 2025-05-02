@@ -13,9 +13,8 @@ class BoardCreator
 {
     public function __construct(
         private BoardRepository $boardRepository,
-        private BoardFactory    $boardFactory,
-    )
-    {
+        private BoardFactory $boardFactory,
+    ) {
     }
 
     /**

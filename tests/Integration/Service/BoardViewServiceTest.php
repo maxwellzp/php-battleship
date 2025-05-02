@@ -22,6 +22,7 @@ class BoardViewServiceTest extends KernelTestCase
     use GameTestTrait;
     use ResetDatabase;
     use Factories;
+
     private BoardViewService $boardViewService;
     private ShotProcessor $shotProcessor;
     protected function setUp(): void
@@ -149,8 +150,13 @@ class BoardViewServiceTest extends KernelTestCase
         $this->assertEquals($expectedY, $cell['y']);
     }
 
-    private function assertShipCell(array $cell, string $expectedType, bool $hit, bool $sunk = false, bool $miss = false): void
-    {
+    private function assertShipCell(
+        array $cell,
+        string $expectedType,
+        bool $hit,
+        bool $sunk = false,
+        bool $miss = false
+    ): void {
         $this->assertEquals($expectedType, $cell['ship']);
         $this->assertSame($hit, $cell['hit']);
         $this->assertSame($sunk, $cell['sunk']);

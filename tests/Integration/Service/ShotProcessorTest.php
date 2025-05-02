@@ -25,6 +25,7 @@ class ShotProcessorTest extends KernelTestCase
     use GameTestTrait;
     use ResetDatabase;
     use Factories;
+
     private ShotProcessor $shotProcessor;
     protected function setUp(): void
     {
@@ -110,5 +111,4 @@ class ShotProcessorTest extends KernelTestCase
         $this->assertNotEmpty($hitPosition);
         $this->assertTrue(reset($hitPosition)['hit']);
     }
-
 }
