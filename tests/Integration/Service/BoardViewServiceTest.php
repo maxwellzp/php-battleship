@@ -5,18 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Service;
 
 use App\DTO\ShipDTO;
-use App\Entity\Game;
-use App\Entity\User;
 use App\Enum\ShipOrientation;
 use App\Enum\ShipType;
-use App\Factory\BoardFactory;
-use App\Factory\UserFactory;
-use App\Repository\BoardRepository;
-use App\Repository\UserRepository;
 use App\Service\BoardViewService;
-use App\Service\GameService;
 use App\Service\ShipPlacer;
 use App\Service\ShotProcessor;
+use App\Tests\Helper\GameTestTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -25,42 +19,20 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 #[CoversClass(BoardViewService::class)]
 class BoardViewServiceTest extends KernelTestCase
 {
+    use GameTestTrait;
     use ResetDatabase;
     use Factories;
-    private UserRepository $userRepository;
-    private GameService $gameService;
-    private Game $game;
-    private User $player1;
-    private User $player2;
     private BoardViewService $boardViewService;
     private ShotProcessor $shotProcessor;
     protected function setUp(): void
     {
-        parent::setUp();
-        $this->bootKernel();
+        $this->bootGameTestKernel();
+        $this->initializeGameWithPlayersAndBoards([]);
 
         $container = $this->getContainer();
         $this->boardViewService = $container->get(BoardViewService::class);
         $shipPlacer = $container->get(ShipPlacer::class);
         $this->shotProcessor = $container->get(ShotProcessor::class);
-
-        $userRepository = $container->get(UserRepository::class);
-        $userFactory = $container->get(UserFactory::class);
-        $this->player1 = $userFactory->create('player1@example.com', 'password');
-        $userRepository->save($this->player1, true);
-        $this->player2 = $userFactory->create('player2@example.com', 'password');
-        $userRepository->save($this->player2, true);
-
-        $gameService = $container->get(GameService::class);
-        $game = $gameService->createNewGame($this->player1);
-        $this->game = $gameService->joinGame($game, $this->player2);
-
-        $boardFactory = $this->getContainer()->get(BoardFactory::class);
-        $this->boardRepository = $container->get(BoardRepository::class);
-        $this->boardPlayer1 = $boardFactory->create($this->game, $this->player1);
-        $this->boardPlayer2 = $boardFactory->create($this->game, $this->player2);
-        $this->boardRepository->save($this->boardPlayer1, true);
-        $this->boardRepository->save($this->boardPlayer2, true);
 
         $coordinates = [
             ["x" => 0, "y" => 0],

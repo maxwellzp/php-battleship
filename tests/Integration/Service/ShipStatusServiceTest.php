@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Service;
 
-use App\Entity\Board;
 use App\Entity\Ship;
-use App\Entity\User;
 use App\Enum\ShipOrientation;
 use App\Enum\ShipType;
 use App\Enum\ShotResult;
-use App\Factory\BoardFactory;
-use App\Factory\GameFactory;
 use App\Factory\ShipFactory;
 use App\Factory\ShotFactory;
-use App\Factory\UserFactory;
-use App\Repository\BoardRepository;
-use App\Repository\GameRepository;
 use App\Repository\ShipRepository;
-use App\Repository\ShotRepository;
-use App\Repository\UserRepository;
 use App\Service\ShipStatusService;
+use App\Tests\Helper\GameTestTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -30,44 +22,21 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 #[CoversClass(ShipStatusService::class)]
 class ShipStatusServiceTest extends KernelTestCase
 {
+    use GameTestTrait;
     use ResetDatabase;
     use Factories;
 
     private EntityManagerInterface $entityManager;
     private Ship $ship;
     private ShotFactory $shotFactory;
-    private Board $boardPlayer1;
-    private User $player2;
-    private BoardRepository $boardRepository;
-    private ShotRepository $shotRepository;
 
     protected function setUp(): void
     {
-        parent::setUp();
-        self::bootKernel();
+        $this->bootGameTestKernel();
+        $this->initializeGameWithPlayersAndBoards([]);
 
         $container = static::getContainer();
         $this->entityManager = $container->get(EntityManagerInterface::class);
-
-        $userFactory = $container->get(UserFactory::class);
-        $userRepository = $container->get(UserRepository::class);
-        $player1 = $userFactory->create('player1@example.com', 'password');
-        $userRepository->save($player1, true);
-        $this->player2 = $userFactory->create('player2@example.com', 'password');
-        $userRepository->save($this->player2, true);
-
-        $gameFactory = $container->get(GameFactory::class);
-        $gameRepository = $container->get(GameRepository::class);
-        $game = $gameFactory->create($player1);
-        $gameRepository->save($game, true);
-
-        $boardFactory = self::getContainer()->get(BoardFactory::class);
-        $this->boardRepository = $container->get(BoardRepository::class);
-        $this->boardPlayer1 = $boardFactory->create($game, $player1);
-        $boardPlayer2 = $boardFactory->create($game, $this->player2);
-        $this->boardRepository->save($this->boardPlayer1, true);
-        $this->boardRepository->save($boardPlayer2, true);
-
 
         $shipFactory = self::getContainer()->get(ShipFactory::class);
         $shipRepository = $container->get(ShipRepository::class);
@@ -87,7 +56,6 @@ class ShipStatusServiceTest extends KernelTestCase
         $this->boardRepository->save($this->boardPlayer1, true);
 
         $this->shotFactory = self::getContainer()->get(ShotFactory::class);
-        $this->shotRepository = $container->get(ShotRepository::class);
     }
 
     public function testUpdateShipSunkStatusWithAllCoordinatesHitMakeShipAsSunk()
