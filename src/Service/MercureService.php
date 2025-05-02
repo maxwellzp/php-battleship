@@ -11,6 +11,10 @@ use Symfony\Component\Mercure\Update;
 
 class MercureService
 {
+    private const TOPIC_NEW_GAME = 'http://example.com/new-game';
+    private const TOPIC_UPDATE_LOBBY_PREFIX = 'http://example.com/update-lobby/';
+    private const TOPIC_GAME_LOG_PREFIX = 'http://example.com/game-logs/';
+
     public function __construct(private readonly HubInterface $hub)
     {
     }
@@ -18,7 +22,7 @@ class MercureService
     public function publishNewGame(Game $game, string $joinPath): void
     {
         $update = new Update(
-            'http://example.com/new-game',
+            self::TOPIC_NEW_GAME,
             json_encode([
                 'gameId' => $game->getId(),
                 'player1' => $game->getPlayer1()->getUsername(),
@@ -32,21 +36,17 @@ class MercureService
 
     public function publishJoinedGame(Game $game, string $shipPlacementUrl): void
     {
-        $update = new Update(
-            'http://example.com/update-lobby/' . $game->getId(),
-            json_encode([
-                'player2Username' => $game->getPlayer2()->getUsername(),
-                'status' => $game->getStatus()->value,
-                'shipPlacementUrl' => $shipPlacementUrl,
-            ])
-        );
-        $this->hub->publish($update);
+        $this->publishLobbyUpdate($game, [
+            'player2Username' => $game->getPlayer2()->getUsername(),
+            'status' => $game->getStatus()->value,
+            'shipPlacementUrl' => $shipPlacementUrl,
+        ]);
     }
 
     public function publishGameEvent(GameEvent $gameEvent): void
     {
         $update = new Update(
-            'http://example.com/game-logs/' . $gameEvent->getGame()->getId(),
+            self::TOPIC_GAME_LOG_PREFIX . $gameEvent->getGame()->getId(),
             json_encode([
                 'message' => $gameEvent->getMessage(),
             ])
@@ -57,32 +57,33 @@ class MercureService
 
     public function publishFirstPlayerPlacedShips(Game $game, int $player, string $statusMsg): void
     {
-        $update = new Update(
-            'http://example.com/update-lobby/' . $game->getId(),
-            json_encode([
-                'status' => 'one_player_ready',
-                'player' => $player,
-                'statusMsg' => $statusMsg
-            ])
-        );
-
-        $this->hub->publish($update);
+        $this->publishLobbyUpdate($game, [
+            'status' => 'one_player_ready',
+            'player' => $player,
+            'statusMsg' => $statusMsg,
+        ]);
     }
 
     public function publishSecondPlayerPlacedShips(
-        Game $game,
-        int $player,
+        Game   $game,
+        int    $player,
         string $statusMsg,
         string $gameStartUrl
-    ): void {
+    ): void
+    {
+        $this->publishLobbyUpdate($game, [
+            'status' => $game->getStatus()->value,
+            'player' => $player,
+            'statusMsg' => $statusMsg,
+            'gameStartUrl' => $gameStartUrl,
+        ]);
+    }
+
+    private function publishLobbyUpdate(Game $game, array $payload): void
+    {
         $update = new Update(
-            'http://example.com/update-lobby/' . $game->getId(),
-            json_encode([
-                'status' => $game->getStatus()->value,
-                'player' => $player,
-                'statusMsg' => $statusMsg,
-                'gameStartUrl' => $gameStartUrl,
-            ])
+            self::TOPIC_UPDATE_LOBBY_PREFIX . $game->getId(),
+            json_encode($payload)
         );
 
         $this->hub->publish($update);
