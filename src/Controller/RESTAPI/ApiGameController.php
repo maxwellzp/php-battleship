@@ -6,7 +6,6 @@ namespace App\Controller\RESTAPI;
 
 use App\DTO\CoordinateDTO;
 use App\DTO\ShipDTO;
-use App\Entity\Board;
 use App\Entity\Game;
 use App\Entity\Ship;
 use App\Entity\User;
@@ -14,7 +13,6 @@ use App\Exception\InvalidPlacementException;
 use App\Factory\BoardFactory;
 use App\Repository\BoardRepository;
 use App\Repository\GameRepository;
-use App\Repository\UserRepository;
 use App\Service\GameService;
 use App\Service\GameStateEvaluator;
 use App\Service\ShipPlacer;
@@ -53,7 +51,6 @@ final class ApiGameController extends AbstractController
     public function shipPlacementSave(
         #[CurrentUser] User $user,
         Game $game,
-        BoardFactory $boardFactory,
         #[MapRequestPayload(type: ShipDTO::class)] array $ships,
         LoggerInterface $logger,
         ShipPlacer $shipPlacer,
@@ -66,10 +63,6 @@ final class ApiGameController extends AbstractController
         }
 
         $board = $boardRepository->findOneBy(['game' => $game, 'player' => $user]);
-        if (!$board instanceof Board) {
-            $board = $boardFactory->create($game, $user);
-            $boardRepository->save($board, true);
-        }
 
         try {
             $shipPlacer->isShipsValid($board, $ships);

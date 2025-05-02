@@ -8,6 +8,7 @@ use App\Entity\Game;
 use App\Entity\User;
 use App\Repository\GameEventRepository;
 use App\Repository\GameRepository;
+use App\Service\BoardCreator;
 use App\Service\BoardViewService;
 use App\Service\GameService;
 use App\Service\MercureService;
@@ -58,12 +59,16 @@ final class GameController extends AbstractController
         #[CurrentUser] User $user,
         Game $game,
         GameService $gameService,
-        MercureService $mercureService
+        MercureService $mercureService,
+        BoardCreator $boardCreator
     ): Response {
         if ($game->getPlayer2() || $game->getPlayer1() === $user) {
             return $this->redirectToRoute('app_game_index');
         }
         $game = $gameService->joinGame($game, $user);
+
+        $boardCreator->createBoards($game);
+
         $mercureService->publishJoinedGame(
             $game,
             $this->generateUrl('app_game_ship_placement', ['id' => $game->getId()])

@@ -16,6 +16,7 @@ use App\Repository\BoardRepository;
 use App\Repository\ShipRepository;
 use App\Repository\ShotRepository;
 use App\Repository\UserRepository;
+use App\Service\BoardCreator;
 use App\Service\GameService;
 use App\Service\ShipPlacer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -36,6 +37,7 @@ trait GameTestTrait
     protected Game $game;
     protected Board $boardPlayer1;
     protected Board $boardPlayer2;
+    protected BoardCreator $boardCreator;
 
     protected function bootGameTestKernel(): void
     {
@@ -43,6 +45,7 @@ trait GameTestTrait
         $container = static::getContainer();
 
         $this->gameService = $container->get(GameService::class);
+        $this->boardCreator = $container->get(BoardCreator::class);
         $this->shipPlacer = $container->get(ShipPlacer::class);
         $this->boardFactory = $container->get(BoardFactory::class);
         $this->boardRepository = $container->get(BoardRepository::class);
@@ -69,11 +72,7 @@ trait GameTestTrait
         $this->game = $this->gameService->createNewGame($this->player1);
         $this->game = $this->gameService->joinGame($this->game, $this->player2);
 
-        $this->boardPlayer1 = $this->boardFactory->create($this->game, $this->player1);
-        $this->boardPlayer2 = $this->boardFactory->create($this->game, $this->player2);
-
-        $this->boardRepository->save($this->boardPlayer1, true);
-        $this->boardRepository->save($this->boardPlayer2, true);
+        [$this->boardPlayer1, $this->boardPlayer2] = $this->boardCreator->createBoards($this->game);
 
         if ($ships === null) {
             $ships = [$this->getDefaultSubmarine()];
