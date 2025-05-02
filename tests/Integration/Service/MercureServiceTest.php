@@ -7,11 +7,13 @@ namespace App\Tests\Integration\Service;
 use App\Factory\GameEventFactory;
 use App\Service\MercureService;
 use App\Tests\Helper\GameTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
+#[CoversClass(MercureService::class)]
 class MercureServiceTest extends KernelTestCase
 {
     use GameTestTrait;
