@@ -51,6 +51,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $losses = null;
 
+    public function __construct(string $email, string $plainPassword, string $username = null)
+    {
+        $this->email = $email;
+        $this->password = $plainPassword;
+        $this->username = $username ?? 'player-' . $email;
+        $this->wins = 0;
+        $this->losses = 0;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;

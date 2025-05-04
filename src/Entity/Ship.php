@@ -42,9 +42,13 @@ class Ship
     #[ORM\Column]
     private ?bool $isSunk = null;
 
-    public function __construct(ShipType $type)
+    public function __construct(Board $board, ShipType $type, ShipOrientation $orientation, array $coordinates)
     {
+        $this->board = $board;
         $this->type = $type;
+        $this->orientation = $orientation;
+        $this->coordinates = $coordinates;
+
         $this->size = $type->getSize();
         $this->isSunk = false;
     }

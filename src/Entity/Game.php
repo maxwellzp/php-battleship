@@ -45,8 +45,9 @@ class Game
     #[ORM\JoinColumn(nullable: true)]
     private ?User $currentTurn = null;
 
-    public function __construct()
+    public function __construct(User $player1)
     {
+        $this->player1 = $player1;
         $this->createdAt = new \DateTimeImmutable();
         $this->status = GameStatus::WAITING_FOR_ANOTHER_PLAYER;
     }

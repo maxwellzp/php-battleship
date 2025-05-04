@@ -9,13 +9,8 @@ use App\Entity\GameEvent;
 
 class GameEventFactory
 {
-    public function create(Game $game, string $message): GameEvent
+    public function create(Game $game, string $message, $createdAt = new \DateTimeImmutable()): GameEvent
     {
-        $GameEvent = new GameEvent();
-        $GameEvent->setGame($game);
-        $GameEvent->setMessage($message);
-        $GameEvent->setCreatedAt(new \DateTimeImmutable());
-
-        return $GameEvent;
+        return new GameEvent($game, $message, $createdAt);
     }
 }

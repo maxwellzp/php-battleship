@@ -12,19 +12,14 @@ use App\Enum\ShotResult;
 class ShotFactory
 {
     public function create(
-        Board $board,
-        User $user,
-        int $x,
-        int $y,
-        ShotResult $shotResult
-    ): Shot {
-        $shot = new Shot();
-        $shot->setBoard($board);
-        $shot->setPlayer($user);
-        $shot->setX($x);
-        $shot->setY($y);
-        $shot->setResult($shotResult);
-        $shot->setFiredAt(new \DateTimeImmutable());
-        return $shot;
+        Board      $board,
+        User       $player,
+        int        $x,
+        int        $y,
+        ShotResult $shotResult,
+                   $firedAt = new \DateTimeImmutable()
+    ): Shot
+    {
+        return new Shot($board, $player, $x, $y, $shotResult, $firedAt);
     }
 }

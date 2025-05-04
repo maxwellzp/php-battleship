@@ -12,16 +12,12 @@ use App\Enum\ShipType;
 class ShipFactory
 {
     public function create(
-        Board $board,
-        ShipType $type,
+        Board           $board,
+        ShipType        $type,
         ShipOrientation $shipOrientation,
-        array $coordinates
-    ): Ship {
-        $ship = new Ship($type);
-        $ship->setBoard($board);
-        $ship->setCoordinates($coordinates);
-        $ship->setOrientation($shipOrientation);
-        $ship->setIsSunk(false);
-        return $ship;
+        array           $coordinates
+    ): Ship
+    {
+        return new Ship($board, $type, $shipOrientation, $coordinates);
     }
 }

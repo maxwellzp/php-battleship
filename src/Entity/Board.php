@@ -46,8 +46,12 @@ class Board
     #[ORM\OneToMany(targetEntity: Ship::class, mappedBy: 'board', orphanRemoval: true)]
     private Collection $ships;
 
-    public function __construct()
+    public function __construct(Game $game, User $player, int $width = 10, int $height = 10)
     {
+        $this->game = $game;
+        $this->player = $player;
+        $this->width = $width;
+        $this->height = $height;
         $this->shots = new ArrayCollection();
         $this->ships = new ArrayCollection();
     }

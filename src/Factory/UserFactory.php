@@ -8,15 +8,10 @@ use App\Entity\User;
 
 class UserFactory
 {
-    public function create(string $email, string $plainPassword): User
+    public function create(string $email, string $plainPassword, string $username = ""): User
     {
-        $user = new User();
-        $user->setEmail($email);
-        $user->setUsername('player-' . $user->getEmail());
-        $user->setPassword($plainPassword);
-        $user->setWins(0);
-        $user->setLosses(0);
-        $user->setCreatedAt(new \DateTimeImmutable());
-        return $user;
+        if ($username === "") $username = 'player-' . $email;
+
+        return new User($email, $plainPassword, $username);
     }
 }

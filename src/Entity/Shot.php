@@ -39,6 +39,16 @@ class Shot
     #[ORM\Column(type: 'string', enumType: ShotResult::class)]
     private ShotResult $result;
 
+    public function __construct(Board $board, User $player, int $x, int $y, ShotResult $shotResult, $firedAt = null)
+    {
+        $this->board = $board;
+        $this->player = $player;
+        $this->x = $x;
+        $this->y = $y;
+        $this->result = $shotResult;
+        $this->firedAt = $firedAt ?? new \DateTimeImmutable();
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;

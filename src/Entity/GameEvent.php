@@ -23,6 +23,13 @@ class GameEvent
     #[ORM\Column(length: 255)]
     private ?string $message = null;
 
+    public function __construct(Game $game, string $message, \DateTimeImmutable $createdAt = null)
+    {
+        $this->game = $game;
+        $this->message = $message;
+        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

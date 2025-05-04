@@ -12,11 +12,6 @@ class BoardFactory
 {
     public function create(Game $game, User $user, int $width = 10, int $height = 10): Board
     {
-        $board = new Board();
-        $board->setPlayer($user);
-        $board->setGame($game);
-        $board->setWidth($width);
-        $board->setHeight($height);
-        return $board;
+        return new Board($game, $user, $width, $height);
     }
 }
