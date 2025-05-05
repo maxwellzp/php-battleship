@@ -103,7 +103,7 @@ class ShotProcessor
         $this->gameEventLogger->log(
             $game,
             sprintf(
-                "Player: %s attacked %s: %s",
+                "%s attacked %s: %s",
                 $user->getUsername(),
                 $this->coordinateConverter->toHumanReadable($x, $y),
                 $shot->getResult()->value
