@@ -8,3 +8,7 @@ import './bootstrap.js';
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
+import * as bootstrap from 'bootstrap';
+
+// Optionally make it available globally
+window.bootstrap = bootstrap;
