@@ -10,11 +10,12 @@ use App\Entity\Game;
 use App\Entity\Ship;
 use App\Entity\User;
 use App\Exception\InvalidPlacementException;
-use App\Factory\BoardFactory;
+use App\Exception\InvalidShotException;
 use App\Repository\BoardRepository;
 use App\Repository\GameRepository;
 use App\Service\GameService;
 use App\Service\GameStateEvaluator;
+use App\Service\MercureService;
 use App\Service\ShipPlacer;
 use App\Service\ShipStatusService;
 use App\Service\ShotProcessor;
@@ -37,7 +38,6 @@ final class ApiGameController extends AbstractController
     /**
      * @param User $user
      * @param Game $game
-     * @param BoardFactory $boardFactory
      * @param ShipDTO[] $ships
      * @param LoggerInterface $logger
      * @param ShipPlacer $shipPlacer
@@ -45,6 +45,7 @@ final class ApiGameController extends AbstractController
      * @param GameRepository $gameRepository
      * @param UpdateLobbyService $updateLobbyService
      * @return JsonResponse
+     * @throws InvalidPlacementException
      */
     #[Route('api/game/{id}/ship-placement', name: 'app_game_ship_placement_save', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
@@ -59,18 +60,20 @@ final class ApiGameController extends AbstractController
         UpdateLobbyService $updateLobbyService,
     ): JsonResponse {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
-            throw $this->createAccessDeniedException();
+            return ApiResponse::error('You are not participating in this game.', 403);
         }
 
         $board = $boardRepository->findOneBy(['game' => $game, 'player' => $user]);
 
         try {
             $shipPlacer->isShipsValid($board, $ships);
-        } catch (InvalidPlacementException $exception) {
+        } catch(InvalidPlacementException $exception) {
             $logger->error($exception->getMessage());
-            return new JsonResponse([
-                'error' => $exception->getMessage()
-            ]);
+            return ApiResponse::error($exception->getMessage(), 403);
+        } catch (\Exception $exception) {
+            $logger->error($exception->getMessage());
+            $logger->error($exception->getTraceAsString());
+            return ApiResponse::error("Something went wrong. Please try again later.", 500);
         }
 
         $shipPlacer->placeShips($board, $ships);
@@ -84,8 +87,9 @@ final class ApiGameController extends AbstractController
             $updateLobbyService->updateLobby($game);
         } catch (\Exception $exception) {
             $logger->error($exception->getMessage());
+            $logger->error($exception->getTraceAsString());
         }
-        return new JsonResponse(['status' => 'ok']);
+        return ApiResponse::success([]);
     }
 
     /**
@@ -98,6 +102,7 @@ final class ApiGameController extends AbstractController
      * @param GameStateEvaluator $gameStateEvaluator
      * @param GameService $gameService
      * @param LoggerInterface $logger
+     * @param ShipStatusService $shipStatusService
      * @return JsonResponse
      */
     #[Route('/api/game/{id}/fire', name: 'api_game_fire', methods: ['POST'])]
@@ -111,14 +116,15 @@ final class ApiGameController extends AbstractController
         GameStateEvaluator $gameStateEvaluator,
         GameService $gameService,
         LoggerInterface $logger,
-        ShipStatusService $shipStatusService
+        ShipStatusService $shipStatusService,
+        MercureService $mercureService,
     ): JsonResponse {
         if (!in_array($user, [$game->getPlayer1(), $game->getPlayer2()], true)) {
-            throw $this->createAccessDeniedException();
+            return ApiResponse::error('You are not participating in this game.', 403);
         }
 
         if ($game->getCurrentTurn() !== $user) {
-            return new JsonResponse(['error' => 'Not your turn'], 403);
+            return ApiResponse::error("It's not your turn now.", 403);
         }
 
         $opponent = $game->getOpponent($user);
@@ -129,23 +135,33 @@ final class ApiGameController extends AbstractController
 
         try {
             $shot = $shotProcessor->processShot($opponentBoard, $user, $shotCoordinates->x, $shotCoordinates->y);
+        } catch(InvalidShotException $exception) {
+            $logger->error($exception->getMessage());
+            return ApiResponse::error($exception->getMessage(), 403);
         } catch (\Exception $exception) {
             $logger->error($exception->getMessage());
             $logger->error($exception->getTraceAsString());
-            return new JsonResponse([
-                'error' => $exception->getMessage()
-            ]);
+            return ApiResponse::error("Something went wrong. Please try again later.", 500);
         }
+
+        $mercureService->publishBoardUpdate(
+            $game,
+            $shotCoordinates->x,
+            $shotCoordinates->y,
+            $shot->getResult()->value,
+            $user->getId()->toString()
+        );
 
         $ship = $opponentBoard->findShipAtPosition($shotCoordinates->x, $shotCoordinates->y);
 
         if ($ship instanceof Ship) {
-            $shipStatusService->updateShipSunkStatus($ship);
+            $shipStatusService->updateShipSunkStatus($ship, $user);
         }
 
         if ($gameStateEvaluator->isGameOver($game) && $winner = $gameStateEvaluator->getWinner($game)) {
             $gameService->finishGame($game, $winner);
-            return new JsonResponse([
+            return ApiResponse::success([
+                'action' => 'win',
                 'winner' => $winner->getUsername()
             ]);
         }
@@ -153,11 +169,12 @@ final class ApiGameController extends AbstractController
         $game->setCurrentTurn($opponent);
         $em->flush();
 
-        return new JsonResponse([
-            'status' => 'ok',
+        return ApiResponse::success([
+            'action' => 'fire',
             'result' => $shot->getResult()->value,
             'x' => $shotCoordinates->x,
             'y' => $shotCoordinates->y,
+            'sunkCoordinates' => $ship->isSunk() ? $ship->getCoordinates() : null,
         ]);
     }
 }
