@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Repository\BoardRepository;
+use App\Repository\GameEventRepository;
 use App\Repository\GameRepository;
 use App\Repository\ShipRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ class RemoveGamesCommand extends Command
         private EntityManagerInterface $entityManager,
         private BoardRepository $boardRepository,
         private ShipRepository $shipRepository,
+        private GameEventRepository $gameEventRepository,
     ) {
         parent::__construct();
     }
@@ -42,6 +44,11 @@ class RemoveGamesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        $events = $this->gameEventRepository->findAll();
+        foreach ($events as $event) {
+            $this->entityManager->remove($event);
+        }
 
         $ships = $this->shipRepository->findAll();
         foreach ($ships as $ship) {
