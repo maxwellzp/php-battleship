@@ -11,7 +11,6 @@ export default class extends Controller {
     };
 
     connect() {
-        console.log('Connect!');
         this.ships = new ShipList([
             { name: "Carrier", size: 5, count: 1 },
             { name: "Battleship", size: 4, count: 1 },
@@ -21,8 +20,6 @@ export default class extends Controller {
         ]);
 
         this.updateRadioButtons();
-        console.log('Orientation:', this.orientationValue);
-        console.log('Api Url:', this.urlValue);
 
         this.boardCells = this.element.querySelectorAll("[data-board-x-value]");
         this.boardCells.forEach(cell => {
@@ -32,9 +29,7 @@ export default class extends Controller {
     }
 
     setOrientation(event) {
-        console.log("Call setOrientation");
         this.orientationValue = event.target.value;
-        console.log('Orientation changed to:', this.orientationValue);
     }
 
 
@@ -118,5 +113,4 @@ export default class extends Controller {
             body: JSON.stringify(this.ships.getPlacements()),
         }).then(res => res.ok ? location.href = "/game/" + this.gameIdValue + "/lobby" : alert("Error saving ships"));
     }
-
 }
