@@ -4,3 +4,7 @@
 /*.miss { background-color: #adb5bd; } !* Gray for misses *!*/
 /*.ship { background-color: #495057; } !* Dark gray for ships (debug)*/
 
+.no-click {
+    pointer-events: none;
+    opacity: 0.6;
+}
