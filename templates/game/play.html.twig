@@ -18,7 +18,10 @@
     <div class="row">
         <div class="col-md-6">
             <h5>Opponent Board</h5>
-            <div {{ stimulus_controller('game', { gameId: game.id}) }}>
+            <div {{ stimulus_controller('game', {
+                gameId: game.id,
+                lobbyUrl: path('app_game_lobby', { id: game.id })
+            }) }}>
                 <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
                     {% for row in opponentBoard %}
                         {% for cell in row %}
@@ -32,6 +35,7 @@
                         {% else %} bg-white hover:bg-light
                         {% endif %}
 "
+                                    data-board="opponent"
                                     data-game-x-value="{{ cell.x }}"
                                     data-game-y-value="{{ cell.y }}"
                                     style="height: 40px; line-height: 40px;"
@@ -52,11 +56,21 @@
 
         <div class="col-md-6">
             <h5>Your Board</h5>
-            <div class="d-grid gap-0" style="grid-template-columns: repeat(10, 40px); width: 400px;">
+            <div
+            {{ stimulus_controller('board-update', {
+                mercureUrl: mercure('http://example.com/board-updates/' ~ game.id),
+                userId: app.user.id
+            }) }}
+                    class="d-grid gap-0"
+                    style="grid-template-columns: repeat(10, 40px); width: 400px;">
                 {% for row in yourBoard %}
                     {% for cell in row %}
 
-                        <div class="border text-center
+                        <div
+                                data-board="your"
+                                data-game-x-value="{{ cell.x }}"
+                                data-game-y-value="{{ cell.y }}"
+                                class="border text-center
                         {% if cell.sunk %} bg-dark text-warning
                         {% elseif cell.hit and cell.ship %} bg-danger text-white
                         {% elseif cell.hit %} bg-secondary text-white
@@ -79,7 +93,7 @@
             </div>
         </div>
     </div>
-
+    <div data-controller="toast"></div>
     <div class="row mt-3">
         <form action="{{ path('app_game_surrender', { id: game.id}) }}" method="POST">
             <button class="btn btn-warning" type="submit">Surrender</button>
