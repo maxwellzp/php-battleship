@@ -103,6 +103,7 @@ final class ApiGameController extends AbstractController
      * @param GameService $gameService
      * @param LoggerInterface $logger
      * @param ShipStatusService $shipStatusService
+     * @param MercureService $mercureService
      * @return JsonResponse
      */
     #[Route('/api/game/{id}/fire', name: 'api_game_fire', methods: ['POST'])]
@@ -160,21 +161,22 @@ final class ApiGameController extends AbstractController
 
         if ($gameStateEvaluator->isGameOver($game) && $winner = $gameStateEvaluator->getWinner($game)) {
             $gameService->finishGame($game, $winner);
-            return ApiResponse::success([
-                'action' => 'win',
-                'winner' => $winner->getUsername()
-            ]);
         }
 
         $game->setCurrentTurn($opponent);
         $em->flush();
 
+        $sunkCoordinates = [];
+        if ($ship && $ship->isSunk()) {
+            $sunkCoordinates = $ship->getCoordinates();
+        }
+
         return ApiResponse::success([
-            'action' => 'fire',
             'result' => $shot->getResult()->value,
             'x' => $shotCoordinates->x,
             'y' => $shotCoordinates->y,
-            'sunkCoordinates' => $ship->isSunk() ? $ship->getCoordinates() : null,
+            'sunkCoordinates' => $sunkCoordinates,
+            'winner' => $game->getWinner() ? $winner->getUsername(): null,
         ]);
     }
 }
