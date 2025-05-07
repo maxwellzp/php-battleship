@@ -8,14 +8,6 @@ jobs:
         run: php -v
       - name: Get code
         uses: actions/checkout@v4
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
       - name: Install composer
         uses: php-actions/composer@v6
       - name: Install Dependencies
