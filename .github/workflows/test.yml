@@ -1,5 +1,13 @@
 name: Test my project
-on: [push, workflow_dispatch]
+on:
+  pull_request:
+    types:
+      - opened
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
 jobs:
   test:
     runs-on: ubuntu-latest
