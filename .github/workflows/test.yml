@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: PHP version
         run: php -v
+      - name: Composer version
+        run: composer --version
       - name: Get code
         uses: actions/checkout@v4
       - name: Cache Composer dependencies
@@ -17,4 +19,17 @@ jobs:
         run: composer install --no-ansi --no-interaction --prefer-dist
       - name: Run Unit tests
         run: php vendor/bin/phpunit --testsuite Unit
-
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+      - name: Install Dependencies
+        run: composer install --no-ansi --no-interaction --prefer-dist
+      - name: Build assets
+        run: npm run build
