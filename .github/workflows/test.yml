@@ -12,6 +12,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
       - name: PHP version
         run: php -v
       - name: Composer version
