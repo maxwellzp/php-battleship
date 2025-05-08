@@ -67,8 +67,12 @@ jobs:
             php bin/console doctrine:database:create --if-not-exists --env=test
             php bin/console doctrine:schema:create --env=test
       - name: Display information
-        if: failure() && steps.create-database.outcome == 'failure'
-        run: php -m
+        if: ${{ failure() && steps.create-database.outcome == 'failure' }}
+        run: |
+          php -m
+          php -v
+          echo "Database creation step failed"
+          php -m | grep pdo_pgsql
       - name: Run integration tests
         run: php ./vendor/bin/phpunit --testsuite Integration
   build:
