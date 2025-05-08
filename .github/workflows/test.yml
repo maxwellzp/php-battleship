@@ -37,8 +37,15 @@ jobs:
         run: php ./vendor/bin/phpunit --testsuite Unit
   integration-tests:
     env:
-      DATABASE_URL: "postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
+      DATABASE_URL: "postgresql://tester_user:password@127.0.0.1:5432/battleship?serverVersion=16&charset=utf8"
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: battleship
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: tester_user
     steps:
       - name: Show App environment variable
         run: echo "Application working in ${{ env.APP_ENV }}"
