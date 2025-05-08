@@ -8,10 +8,14 @@ on:
     branches:
       - main
       - dev
+env:
+  APP_ENV: test
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
     steps:
+      - name: Show App environment variable
+        run: echo "Application working in ${{ env.APP_ENV }}"
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Setup PHP with PECL extension
@@ -32,8 +36,14 @@ jobs:
       - name: Run Unit tests
         run: php ./vendor/bin/phpunit --testsuite Unit
   integration-tests:
+    env:
+      DATABASE_URL: "postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
     runs-on: ubuntu-latest
     steps:
+      - name: Show App environment variable
+        run: echo "Application working in ${{ env.APP_ENV }}"
+      - name: Database URL environment variable
+        run: echo "Application connected to DB ${{ env.DATABASE_URL }}"
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Setup PHP with PECL extension
@@ -52,9 +62,13 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-ansi --no-interaction --prefer-dist
       - name: Create database schema
+        id: create-database
         run: |
             php bin/console doctrine:database:create --if-not-exists --env=test
             php bin/console doctrine:schema:create --env=test
+      - name: Display information
+        if: failure() && steps.create-database.outcome == 'failure'
+        run: php -m
       - name: Run integration tests
         run: php ./vendor/bin/phpunit --testsuite Integration
   build:
@@ -73,6 +87,11 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install npm dependencies
         run: npm ci
       - name: Build assets
