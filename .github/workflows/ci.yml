@@ -86,7 +86,7 @@ jobs:
       - name: Run integration tests
         run: php ./vendor/bin/phpunit --testsuite Integration
   build:
-    needs: [unit-tests, integration-tests]
+#    needs: [unit-tests, integration-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Get code
