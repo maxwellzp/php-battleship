@@ -1,4 +1,4 @@
-name: Test my project
+name: Battleship CI
 on:
   pull_request:
     types:
@@ -101,13 +101,8 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-      - name: Cache Node dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Install dependencies
+        uses: ./.github/actions/cached-deps
       - name: Build assets
         run: npm run build
       - name: Upload artifacts
