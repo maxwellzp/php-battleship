@@ -31,10 +31,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class ApiGameController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
-    {
-    }
-
     /**
      * @param User $user
      * @param Game $game
