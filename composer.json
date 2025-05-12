@@ -1,4 +1,6 @@
 {
+    "name": "maxwellzp/php-battleship",
+    "description": "Symfony-based Battleship game with PostgreSQL storage, Mercure protocol and Stimulus JS framework",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
