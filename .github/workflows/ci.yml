@@ -11,6 +11,32 @@ on:
 env:
   APP_ENV: test
 jobs:
+  validate-composer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer validate --strict --no-check-all --no-check-publish
+
+  unit-tests:
+    needs: validate-composer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: pcov
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress
+      - run: php ./vendor/bin/phpunit --testsuite Unit
+
 #  unit-tests:
 #    runs-on: ubuntu-latest
 #    steps:
