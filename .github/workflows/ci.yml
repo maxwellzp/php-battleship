@@ -71,6 +71,7 @@ jobs:
       - name: Run integration tests
         run: |
           php ./vendor/bin/phpunit --testsuite Integration
+          echo "PHPUnit exit code: $?"
       - name: Debug information
         if: ${{ failure() && steps.create-database.outcome == 'failure' }}
         run: |
