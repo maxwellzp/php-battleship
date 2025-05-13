@@ -32,10 +32,9 @@ npm run dev
 cp .env .env.local
 ```
 6. Set up your environment variables for Postgres in .env.local
-POSTGRES_DB=yourdbname
-POSTGRES_USER=youruser
+POSTGRES_DB=yourdbname\
+POSTGRES_USER=youruser\
 POSTGRES_PASSWORD=yourpassword
-
 7. Start database and mercure services via Docker compose
 ```bash
 docker compose --env-file .env.local up -d
