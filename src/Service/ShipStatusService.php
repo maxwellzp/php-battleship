@@ -6,12 +6,12 @@ namespace App\Service;
 
 use App\Entity\Ship;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ShipRepository;
 
 class ShipStatusService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly ShipRepository $shipRepository,
         private readonly MercureService $mercureService,
     ) {
     }
@@ -22,7 +22,7 @@ class ShipStatusService
 
         if ($ship->isSunkByShots($shots) && !$ship->isSunk()) {
             $ship->setIsSunk(true);
-            $this->entityManager->flush();
+            $this->shipRepository->save($ship, true);
 
             $this->mercureService->publishShipIsSunk($ship, $player->getId()->toString());
         }

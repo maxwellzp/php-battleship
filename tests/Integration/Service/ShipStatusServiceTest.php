@@ -11,6 +11,7 @@ use App\Enum\ShotResult;
 use App\Factory\ShipFactory;
 use App\Factory\ShotFactory;
 use App\Repository\ShipRepository;
+use App\Service\MercureService;
 use App\Service\ShipStatusService;
 use App\Tests\Helper\GameTestTrait;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,17 +61,26 @@ class ShipStatusServiceTest extends KernelTestCase
 
     public function testUpdateShipSunkStatusWithAllCoordinatesHitMakeShipAsSunk()
     {
+        $mercureServiceMock = $this->createMock(MercureService::class);
+        $mercureServiceMock->expects($this->exactly(1))->method('publishShipIsSunk');
+
+        $shipStatusService = new ShipStatusService($this->shipRepository, $mercureServiceMock);
+
         $this->createShots($this->ship->getType()->getSize());
-        $shipStatusService = new ShipStatusService($this->entityManager);
-        $shipStatusService->updateShipSunkStatus($this->ship);
+
+        $shipStatusService->updateShipSunkStatus($this->ship, $this->ship->getBoard()->getPlayer());
         $this->assertTrue($this->ship->isSunk());
     }
 
     public function testUpdateShipSunkStatusWithOnlyOneHitDoestMakeShipAsSunk()
     {
+        $mercureServiceMock = $this->createMock(MercureService::class);
+
+        $shipStatusService = new ShipStatusService($this->shipRepository, $mercureServiceMock);
+
         $this->createShots(1);
-        $shipStatusService = new ShipStatusService($this->entityManager);
-        $shipStatusService->updateShipSunkStatus($this->ship);
+
+        $shipStatusService->updateShipSunkStatus($this->ship, $this->ship->getBoard()->getPlayer());
         $this->assertFalse($this->ship->isSunk());
     }
 

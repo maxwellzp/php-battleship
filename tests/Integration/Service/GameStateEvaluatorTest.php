@@ -9,7 +9,9 @@ use App\Enum\ShipOrientation;
 use App\Enum\ShipType;
 use App\Service\GameService;
 use App\Service\GameStateEvaluator;
+use App\Service\MercureService;
 use App\Service\ShipPlacer;
+use App\Service\ShipStatusService;
 use App\Service\ShotProcessor;
 use App\Tests\Helper\GameTestTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -79,8 +81,15 @@ class GameStateEvaluatorTest extends KernelTestCase
             $this->shotProcessor->processShot($this->boardPlayer1, $this->player2, 0, $y);
         }
 
+        $mercureServiceMock = $this->createMock(MercureService::class);
+        $mercureServiceMock->expects($this->exactly(1))->method('publishShipIsSunk');
+        $shipStatusService = new ShipStatusService($this->shipRepository, $mercureServiceMock);
+
+        $ship = $this->boardPlayer1->findShipAtPosition(0, 0);
+        $shipStatusService->updateShipSunkStatus($ship, $this->player2);
+
         $gameStateEvaluator = new GameStateEvaluator($this->boardRepository);
         $result = $gameStateEvaluator->isGameOver($this->game);
-        //$this->assertTrue($result);
+        $this->assertTrue($result);
     }
 }
