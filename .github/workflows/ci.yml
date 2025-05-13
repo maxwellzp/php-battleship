@@ -92,7 +92,7 @@ jobs:
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-      - run: composer install --prefer-dist --no-progress --no-dev
+      - run: composer install --prefer-dist --no-progress
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
