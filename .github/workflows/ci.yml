@@ -38,6 +38,7 @@ jobs:
       - run: php ./vendor/bin/phpunit --testsuite Unit
 
   integration-tests:
+    needs: validate-composer
     env:
       DATABASE_URL: "postgresql://tester_user:password@127.0.0.1:5432/battleship?serverVersion=16&charset=utf8"
     runs-on: ubuntu-latest
@@ -68,7 +69,8 @@ jobs:
           php bin/console doctrine:database:create --if-not-exists --env=test
           php bin/console doctrine:schema:create --env=test
       - name: Run integration tests
-        run: php ./vendor/bin/phpunit --testsuite Integration
+        run: |
+          php ./vendor/bin/phpunit --testsuite Integration
       - name: Debug information
         if: ${{ failure() && steps.create-database.outcome == 'failure' }}
         run: |
