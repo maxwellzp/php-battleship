@@ -63,11 +63,11 @@ jobs:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
       - run: composer install --prefer-dist --no-progress
+      - run: |
+          php bin/console doctrine:database:create --if-not-exists --env=test --no-interaction
+          php bin/console doctrine:schema:create --env=test
       - name: Test PostgreSQL connection
         run: PGPASSWORD=password psql -h localhost -U tester_user -d battleship -c "SELECT 1"
-      - run: |
-          php bin/console doctrine:database:create --if-not-exists --env=test
-          php bin/console doctrine:schema:create --env=test
       - name: Run integration tests
         run: |
           php ./vendor/bin/phpunit --testsuite Integration
@@ -92,7 +92,7 @@ jobs:
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-      - run: composer install --prefer-dist --no-progress
+      - run: composer install --prefer-dist --no-progress --no-dev
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
