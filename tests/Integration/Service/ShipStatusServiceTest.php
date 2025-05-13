@@ -14,7 +14,6 @@ use App\Repository\ShipRepository;
 use App\Service\MercureService;
 use App\Service\ShipStatusService;
 use App\Tests\Helper\GameTestTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -27,7 +26,6 @@ class ShipStatusServiceTest extends KernelTestCase
     use ResetDatabase;
     use Factories;
 
-    private EntityManagerInterface $entityManager;
     private Ship $ship;
     private ShotFactory $shotFactory;
 
@@ -37,7 +35,6 @@ class ShipStatusServiceTest extends KernelTestCase
         $this->initializeGameWithPlayersAndBoards([]);
 
         $container = static::getContainer();
-        $this->entityManager = $container->get(EntityManagerInterface::class);
 
         $shipFactory = self::getContainer()->get(ShipFactory::class);
         $shipRepository = $container->get(ShipRepository::class);

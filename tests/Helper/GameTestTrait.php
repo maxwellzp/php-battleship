@@ -18,6 +18,7 @@ use App\Repository\ShotRepository;
 use App\Repository\UserRepository;
 use App\Service\BoardCreator;
 use App\Service\GameService;
+use App\Service\MercureService;
 use App\Service\ShipPlacer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -44,6 +45,8 @@ trait GameTestTrait
         static::bootKernel();
         $container = static::getContainer();
 
+        $mercureServiceMock = $this->createMock(MercureService::class);
+        $container->set(MercureService::class, $mercureServiceMock);
         $this->gameService = $container->get(GameService::class);
         $this->boardCreator = $container->get(BoardCreator::class);
         $this->shipPlacer = $container->get(ShipPlacer::class);
